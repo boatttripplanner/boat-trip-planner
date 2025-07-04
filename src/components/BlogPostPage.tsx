@@ -72,7 +72,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateToBlogIndex
         return new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime();
     });
 
-    let finalRelatedPosts = postsWithSharedTags.slice(0, 3);
+    const finalRelatedPosts = postsWithSharedTags.slice(0, 3);
     
     // Fallback if not enough related posts
     if (finalRelatedPosts.length < 3) {
@@ -90,9 +90,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateToBlogIndex
   const handleShareViaWhatsApp = () => {
     if (!post) return;
     const postUrl = `${window.location.origin}/?view=blog_post&slug=${post.frontmatter.slug}`;
-    let shareText = `¡Echa un vistazo a este artículo del blog de BoatTrip Planner! 🚤\n\n`;
-    shareText += `"${post.frontmatter.title}"\n\n`;
-    shareText += `Léelo aquí: ${postUrl}\n\n`;
+    const shareText = `¡Echa un vistazo a este artículo del blog de BoatTrip Planner! 🚤\n\n"${post.frontmatter.title}"\n\nLéelo aquí: ${postUrl}\n\n`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
@@ -102,15 +100,15 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateToBlogIndex
   };
 
   const markdownComponents: Components = {
-    h1: ({node, ...props}) => <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mt-0 mb-3" {...props} />,
-    h2: ({node, ...props}) => <h2 className="text-2xl md:text-3xl font-bold" {...props} />,
-    h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-semibold" {...props} />,
-    h4: ({node, ...props}) => <h4 className="text-lg md:text-xl font-semibold" {...props} />,
-    p: ({node, ...props}) => <p {...props} />,
-    ul: ({node, ...props}) => <ul className="list-disc" {...props} />,
-    ol: ({node, ...props}) => <ol className="list-decimal" {...props} />,
-    li: ({node, ...props}) => <li {...props} />,
-    a: ({ node, children, href, ...props }) => {
+    h1: (props) => <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mt-0 mb-3" {...props} />,
+    h2: (props) => <h2 className="text-2xl md:text-3xl font-bold" {...props} />,
+    h3: (props) => <h3 className="text-xl md:text-2xl font-semibold" {...props} />,
+    h4: (props) => <h4 className="text-lg md:text-xl font-semibold" {...props} />,
+    p: (props) => <p {...props} />,
+    ul: (props) => <ul className="list-disc" {...props} />,
+    ol: (props) => <ol className="list-decimal" {...props} />,
+    li: (props) => <li {...props} />,
+    a: ({ children, href }) => {
       const linkText = getNodeTextContent(children);
       if (href === AMAZON_AFFILIATE_LINK_PLACEHOLDER) {
         const userAffiliateLink = "https://amzn.to/3I4xn3e";
@@ -121,7 +119,6 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateToBlogIndex
             rel="noopener noreferrer sponsored"
             className="text-amber-600 hover:text-amber-700 underline font-semibold group inline-flex items-center"
             title={`Ver "${linkText}" en Amazon.es (enlace de afiliado)`}
-            {...props}
           >
             {children}
             <ShoppingCartIcon className="w-4 h-4 ml-1 text-amber-500 group-hover:text-amber-600 transition-colors" />
@@ -140,7 +137,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateToBlogIndex
                   onNavigateToPost(slugParam);
                 }}
                 className="text-teal-600 hover:text-teal-700 underline font-semibold focus:outline-none p-0 m-0 bg-transparent border-none cursor-pointer text-left"
-                title={props.title || `Leer más sobre ${linkText}`}
+                title={`Leer más sobre ${linkText}`}
               >
                 {children}
               </button>
@@ -151,15 +148,15 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onNavigateToBlogIndex
         }
       }
       if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
-        return <a href={href} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:text-teal-700" {...props}>{children}</a>;
+        return <a href={href} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:text-teal-700">{children}</a>;
       }
       if (href === "/") {
         return <button onClick={(e) => { e.preventDefault(); onNavigateHome();}} className="text-teal-600 hover:text-teal-700 underline font-semibold focus:outline-none">{children}</button>;
       }
-      return <a href={href} className="text-teal-600 hover:text-teal-700" {...props}>{children}</a>;
+      return <a href={href} className="text-teal-600 hover:text-teal-700">{children}</a>;
     },
-    blockquote: ({node, ...props}) => <blockquote {...props} />,
-    img: ({node, src, alt, ...props}) => null, // Do not render images in post content
+    blockquote: (blockProps) => <blockquote {...blockProps} />,
+    img: () => null, // Do not render images in post content
   };
 
   if (!post) {

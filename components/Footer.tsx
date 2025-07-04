@@ -1,9 +1,6 @@
 import React from 'react';
-import { SAMBOAT_AFFILIATE_URL } from '../constants';
 import { FooterProps } from '../types'; 
 import { SailboatIcon } from './icons/SailboatIcon';
-import { TikTokIcon } from './icons/TikTokIcon';
-import { MapRouteIcon } from './icons/MapRouteIcon';
 
 const Footer: React.FC<FooterProps> = ({ 
   onShowPrivacyPolicy, 
@@ -11,8 +8,6 @@ const Footer: React.FC<FooterProps> = ({
   onNavigateToMainApp,
   onNavigateToBlogIndex,
 }) => {
-  const linkStyle = "hover:text-accent focus:text-accent transition-colors duration-200 font-bold text-base px-2 underline-offset-4 hover:underline";
-  
   return (
     <footer className="shadow-none border-t border-border bg-bg text-text-secondary" style={{background:'#f6fafd', color:'#5c677d', borderTop:'1px solid #e2e8f0', boxShadow:'none', marginTop:'2em', padding:'2em 0 1em 0', fontSize:'0.98em'}}>
       <div className="container flex flex-col md:flex-row items-center justify-between gap-4">

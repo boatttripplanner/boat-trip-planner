@@ -5,11 +5,12 @@ interface AdSlotProps {
   adClientId: string;
   className?: string;
   style?: React.CSSProperties;
+  adsbygoogle?: unknown[];
 }
 
 declare global {
   interface Window {
-    adsbygoogle?: any[];
+    adsbygoogle?: unknown[];
   }
 }
 

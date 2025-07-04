@@ -18,7 +18,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ onClose }) => {
         <div className="overflow-y-auto custom-scrollbar flex-grow pr-2 space-y-3 text-sm text-slate-700">
           <p><strong>Última actualización:</strong> {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
-          <p>Bienvenido/a a BoatTrip Planner (en adelante, "nosotros", "nuestro" o "la Aplicación"). Nos tomamos muy en serio tu privacidad. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos tu información cuando utilizas nuestra aplicación web.</p>
+          <p>Bienvenido/a a BoatTrip Planner (en adelante, &quot;nosotros&quot;, &quot;nuestro&quot; o la &quot;Aplicación&quot;). Nos tomamos muy en serio tu privacidad. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos tu información cuando utilizas nuestra aplicación web.</p>
 
           <h3 className="text-lg font-semibold text-slate-700 mt-3">1. Información que Recopilamos</h3>
           <p>Podemos recopilar la siguiente información:</p>

@@ -1,5 +1,4 @@
 import React from 'react';
-import { CheckIcon } from '../icons/CheckIcon';
 import { MapPinIcon } from '../icons/MapPinIcon';
 import { UsersIcon } from '../icons/UsersIcon';
 import { WindIcon } from '../icons/WindIcon';
@@ -13,11 +12,11 @@ interface ProgressStepperProps {
 
 const ProgressStepper: React.FC<ProgressStepperProps> = ({ steps, currentStep }) => {
   const stepIcons = [
-    <InfoOutlineIcon className="w-7 h-7 text-primary inline-block mr-1" />, // Experiencia
-    <MapPinIcon className="w-7 h-7 text-primary inline-block mr-1" />, // Ruta
-    <UsersIcon className="w-7 h-7 text-primary inline-block mr-1" />, // Tripulación
-    <WindIcon className="w-7 h-7 text-secondary inline-block mr-1" />, // Preferencias
-    <ChecklistIcon className="w-7 h-7 text-accent inline-block mr-1" /> // Revisar
+    <InfoOutlineIcon key="icon-info" className="w-7 h-7 text-primary inline-block mr-1" />, // Experiencia
+    <MapPinIcon key="icon-map" className="w-7 h-7 text-primary inline-block mr-1" />, // Ruta
+    <UsersIcon key="icon-users" className="w-7 h-7 text-primary inline-block mr-1" />, // Tripulación
+    <WindIcon key="icon-wind" className="w-7 h-7 text-secondary inline-block mr-1" />, // Preferencias
+    <ChecklistIcon key="icon-checklist" className="w-7 h-7 text-accent inline-block mr-1" /> // Revisar
   ];
 
   return (

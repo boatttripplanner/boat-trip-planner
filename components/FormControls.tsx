@@ -1,6 +1,4 @@
 import React from 'react';
-import { MapPinIcon } from './icons/MapPinIcon';
-import { WindIcon } from './icons/WindIcon';
 import { AlertTriangleIcon } from './icons/AlertTriangleIcon';
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {

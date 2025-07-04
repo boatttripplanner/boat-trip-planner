@@ -1,9 +1,6 @@
 import React from 'react';
 import { AppView } from '../types';
-import { SailboatIcon } from './icons/SailboatIcon';
 import { GuidanceSailIcon } from './icons/GuidanceSailIcon';
-import { MapRouteIcon } from './icons/MapRouteIcon';
-import { WindIcon } from './icons/WindIcon';
 
 interface HeaderProps {
   title: string;

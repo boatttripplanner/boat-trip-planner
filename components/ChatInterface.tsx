@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AppChatSession, ChatMessage } from '../types';
+import { AppChatSession } from '../types';
 import { Button } from './Button';
 import { ChatSendIcon } from './icons/ChatSendIcon';
 import { UserAvatarIcon } from './icons/UserAvatarIcon';
 import { SparklesIcon } from './icons/SparklesIcon'; // AI icon
 import { LoadingSpinner } from './LoadingSpinner';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface ChatInterfaceProps {
@@ -31,11 +31,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ chatSession, onSendMessag
     }
   };
   
-  const markdownComponents = {
-    p: ({node, ...props}: any) => <p className="mb-2 leading-relaxed" {...props} />,
-    ul: ({node, ...props}: any) => <ul className="list-disc list-inside pl-4 mb-2 space-y-1" {...props} />,
-    ol: ({node, ...props}: any) => <ol className="list-decimal list-inside pl-4 mb-2 space-y-1" {...props} />,
-    strong: ({node, ...props}: any) => <strong className="font-semibold" {...props} />,
+  const renderers: Components = {
+    p: (props) => <p className="mb-2 leading-relaxed" {...props} />,
+    ul: (props) => <ul className="list-disc list-inside pl-4 mb-2 space-y-1" {...props} />,
+    ol: (props) => <ol className="list-decimal list-inside pl-4 mb-2 space-y-1" {...props} />,
+    strong: (props) => <strong className="font-semibold" {...props} />,
   };
 
   return (
@@ -52,7 +52,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ chatSession, onSendMessag
                   : 'bg-slate-200 text-slate-800'
               }`}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={renderers}>
                 {msg.content}
               </ReactMarkdown>
               <div className={`text-xs mt-1 ${msg.role === 'user' ? 'text-teal-200 text-right' : 'text-slate-500'}`}>

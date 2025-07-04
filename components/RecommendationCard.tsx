@@ -168,7 +168,7 @@ const WeatherInfoDisplay: React.FC<{
 
   let iconUrl: string = "";
   const sourceText = "AccuWeather"; // Assuming AccuWeather if data is present
-  let forecastDate = new Date(weatherData.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+  const forecastDate = new Date(weatherData.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
 
   if (weatherData.accuWeatherDayIcon) {
     iconUrl = getAccuWeatherIconUrl(weatherData.accuWeatherDayIcon);
@@ -335,25 +335,25 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
 
   const baseMarkdownComponents: Components = {
-    h4: ({node, ...props}) => <h4 className="text-xl font-semibold text-slate-700 mt-6 mb-4 pb-3 border-b-2 border-slate-200" {...props} />,
-    h5: ({node, ...props}) => <h5 className="text-md font-semibold text-slate-700 mt-3 mb-1" {...props} />,
-    p: ({node, ...props}) => <p className="text-slate-800 mb-3 leading-relaxed" {...props} />,
-    ul: ({node, ...props}) => <ul className="list-disc list-inside pl-5 mb-4 space-y-2 text-slate-800" {...props} />,
-    ol: ({node, ...props}) => <ol className="list-decimal list-inside pl-5 mb-4 space-y-2 text-slate-800" {...props} />,
-    li: ({node, ...props}) => <li className="mb-1" {...props} />,
-    strong: ({node, ...props}) => <strong className="font-semibold text-slate-900" {...props} />,
-    a: ({ node, children, ...props }) => {
+    h4: (props) => <h4 className="text-xl font-semibold text-slate-700 mt-6 mb-4 pb-3 border-b-2 border-slate-200" {...props} />,
+    h5: (props) => <h5 className="text-md font-semibold text-slate-700 mt-3 mb-1" {...props} />,
+    p: (props) => <p className="text-slate-800 mb-3 leading-relaxed" {...props} />,
+    ul: (props) => <ul className="list-disc list-inside pl-5 mb-4 space-y-2 text-slate-800" {...props} />,
+    ol: (props) => <ol className="list-decimal list-inside pl-5 mb-4 space-y-2 text-slate-800" {...props} />,
+    li: (props) => <li className="mb-1" {...props} />,
+    strong: (props) => <strong className="font-semibold text-slate-900" {...props} />,
+    a: ({ children, ...props }) => {
         return <a className="text-teal-600 hover:text-teal-700 underline" target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
     },
-    blockquote: ({node, ...props}) => <blockquote className="bg-white border-l-4 border-teal-300 rounded-r-lg p-4 my-4 shadow-sm text-slate-800 leading-relaxed" {...props} />,
+    blockquote: (props) => <blockquote className="bg-white border-l-4 border-teal-300 rounded-r-lg p-4 my-4 shadow-sm text-slate-800 leading-relaxed" {...props} />,
   };
 
   const interactiveChecklistComponents: Components = {
     ...baseMarkdownComponents,
-    h5: ({node, ...props}) => <h5 className="text-md font-semibold text-teal-700 bg-teal-50 px-3 py-2 rounded-md mt-4 mb-2 shadow-sm" {...props} />,
-    ul: ({node, ...props}) => <ul className="list-none p-0 m-0 space-y-0 mb-4" {...props} />, 
+    h5: (props) => <h5 className="text-md font-semibold text-teal-700 bg-teal-50 px-3 py-2 rounded-md mt-4 mb-2 shadow-sm" {...props} />,
+    ul: (props) => <ul className="list-none p-0 m-0 space-y-0 mb-4" {...props} />, 
     li: ({ node, children, ...props }) => {
-      const itemKey = (node as any).position?.start?.offset?.toString() || `ai-item-${(node as HastElement & {index?: number})?.index ?? Math.random().toString(36).substr(2, 9)}`;
+      const itemKey = (node as { position?: { start?: { offset?: number } } })?.position?.start?.offset?.toString() || `ai-item-${(node as HastElement & {index?: number})?.index ?? Math.random().toString(36).substr(2, 9)}`;
       const isChecked = !!checkedAiItems[itemKey];
       const textContent = getNodeText(children).trim();
       const isPurchasable = isItemPotentiallyPurchasable(textContent);
@@ -406,7 +406,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         </li>
       );
     },
-     a: ({ node, children, href, ...props }) => {
+     a: ({ children, href }) => {
         return (
           <a href={href} 
              target="_blank" 

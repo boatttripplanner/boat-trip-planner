@@ -4,7 +4,6 @@ import { DateField, InputField, RadioGroup, TextAreaField } from '../FormControl
 import { AutocompleteInputField } from '../AutocompleteInputField';
 import { worldPorts } from '../../data/ports';
 import { MapPinIcon } from '../icons/MapPinIcon';
-import { WindIcon } from '../icons/WindIcon';
 
 const Step2Route: React.FC<WizardStepProps> = ({ data, updateData, isPrimaryInputDisabled, onReconsiderCookies }) => {
 
