@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🛥️ BoatTrip Planner
 
 Una app para recomendar rutas e ideas cuando alquilas un barco o si ya tienes uno, y quieres explorar cualquier destino del mundo. Incluye blog, monetización con enlaces de afiliado (Amazon y SamBoat), y experiencia profesional en móviles y web.
@@ -110,6 +111,33 @@ pnpm dev
 # or
 bun dev
 ```
+=======
+# Boat Trip Planner
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+**Prerequisites:** Node.js
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   # or
+   bun dev
+   ```
+>>>>>>> d5fc395
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

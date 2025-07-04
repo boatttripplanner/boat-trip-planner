@@ -1,0 +1,304 @@
+/* FUENTE MODERNA Y LIMPIA */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --color-bg: #f6fafd;
+  --color-bg-deep: #0a2540;
+  --color-primary: #155fa0;
+  --color-secondary: #4fc3f7;
+  --color-accent: #ffd166;
+  --color-coral: #ff6f61;
+  --color-gold: #ffb700;
+  --color-card: #fff;
+  --color-border: #e2e8f0;
+  --color-text: #1a202c;
+  --color-text-secondary: #5c677d;
+  --radius: 1.1rem;
+  --shadow: 0 2px 8px 0 rgba(10,37,64,0.04);
+  --transition: 0.2s cubic-bezier(.4,0,.2,1);
+}
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background var(--transition), color var(--transition);
+}
+
+/* FONDO DE OLAS */
+body::before {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: -1;
+  background: url('https://svgshare.com/i/14kA.svg') repeat-x bottom, linear-gradient(180deg, #e6f6ff 0%, #b3e0ff 100%);
+  background-size: cover, 100% 100px;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+/* TARJETAS MARINAS */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  padding: 2em 1.5em;
+  margin-bottom: 2em;
+  transition: box-shadow 0.2s, background 0.2s, border 0.2s, transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px 0 #155fa022;
+  border-color: var(--color-primary);
+  transform: translateY(-1px) scale(1.01);
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1em 0.5em;
+    margin-bottom: 1em;
+  }
+}
+
+/* TITULOS NÁUTICOS */
+h1, h2, h3 {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-primary);
+  text-shadow: none;
+}
+h1 { font-size: 2.1rem; margin-bottom: 1em; }
+h2 { font-size: 1.4rem; margin-bottom: 0.8em; }
+h3 { font-size: 1.1rem; margin-bottom: 0.5em; }
+
+/* BOTONES MARINOS */
+button, .btn {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  border-radius: 1.5em;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  padding: 0.8em 2em;
+  box-shadow: 0 2px 8px 0 var(--color-primary)11;
+  cursor: pointer;
+  font-size: 1em;
+  letter-spacing: 0.01em;
+  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+button:hover, .btn:hover {
+  background: var(--color-secondary);
+  color: #fff;
+  box-shadow: 0 4px 16px 0 var(--color-secondary)22;
+  border: none;
+}
+button:active, .btn:active {
+  transform: scale(0.98) translateY(1px);
+}
+
+/* INPUTS Y SELECTS MARINOS */
+input, select, textarea {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1em;
+  color: var(--color-text-secondary);
+  border-radius: 1em;
+  border: 1.5px solid var(--color-border);
+  padding: 0.9em 1.1em;
+  background: #fafdff;
+  box-shadow: 0 1px 4px 0 #b3e0ff22;
+  margin-bottom: 1em;
+  transition: border var(--transition), box-shadow var(--transition), background var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  background: #e3f2fd;
+  box-shadow: 0 0 0 2px var(--color-primary)22;
+}
+
+/* LINKS MARINOS */
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition), text-shadow var(--transition);
+}
+a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* ANIMACIONES Y EFECTOS */
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* LAYOUT BASE */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+}
+section {
+  border-radius: 1.5em;
+  margin-bottom: 2em;
+  background: #fff;
+  box-shadow: 0 2px 8px 0 #b3e0ff11;
+  padding: 1.5em 1em;
+}
+
+/* SCROLLBAR MARINA */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e3f2fd;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 8px;
+}
+
+/* MODO OSCURO/NEÓN SIEMPRE ACTIVO */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #0f1021;
+    --color-bg-glass: rgba(20, 24, 40, 0.7);
+    --color-card: rgba(255,255,255,0.08);
+    --color-text: #f4f4f4;
+    --color-text-secondary: #b0b0b0;
+  }
+}
+
+/* Eliminar decoraciones de olas y animaciones recargadas */
+.wave-separator, .animated-wave-separator, body::before {
+  display: none !important;
+}
+
+/* Footer minimalista */
+footer {
+  background: #f6fafd;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border);
+  box-shadow: none;
+  margin-top: 2em;
+  padding: 2em 0 1em 0;
+  font-size: 0.98em;
+}
+
+/* Header minimalista */
+header {
+  background: #fff;
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: none;
+  min-height: 60px;
+  padding: 0.5em 0;
+}
+
+/* ACCESIBILIDAD Y EXPERIENCIA MÓVIL */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #ffd16655;
+  transition: outline 0.2s, box-shadow 0.2s;
+}
+
+button, .btn, input, select, textarea, a {
+  outline: none;
+}
+
+@media (max-width: 600px) {
+  html {
+    font-size: 15px;
+  }
+  .container {
+    padding: 0 0.5rem;
+  }
+  .card, section {
+    padding: 0.7em 0.3em;
+    margin-bottom: 0.7em;
+  }
+  button, .btn, input, select, textarea {
+    font-size: 1em;
+    padding: 0.9em 1em;
+  }
+  h1 { font-size: 1.3rem; }
+  h2 { font-size: 1.1rem; }
+  h3 { font-size: 1rem; }
+  svg, .icon, .w-5, .w-6, .w-7, .w-8, .w-10, .w-12, .w-14, .w-16 {
+    width: 1.8em !important;
+    height: 1.8em !important;
+  }
+}
+
+/* Contraste reforzado para accesibilidad */
+body, .card, section, .container, h1, h2, h3, label, p, a, button, .btn {
+  text-shadow: none !important;
+}
+.card, section {
+  background: var(--color-card);
+  color: var(--color-text);
+}
+
+/* Enlaces y botones: focus visible y contraste */
+a:focus-visible, button:focus-visible, .btn:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #ffd16655;
+  background: #fffbe6;
+  color: var(--color-primary) !important;
+}
+
+/* Inputs: focus visible y contraste */
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px #ffd16655;
+  background: #fffbe6;
+}
+
+/* Elimino decoraciones y animaciones innecesarias */
+.animated-wave, .glassmorph-stepper, .card-animate, .section-animate, .fade-in, .slide-up, .scale-in, .pulse-slow, .animate-slow-wave, .animate-bounce-slow, .animate-spin-slow {
+  animation: none !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* SEPARADOR DE OLAS */
+.wave-separator {
+  width: 100%;
+  height: 48px;
+  background: url('https://svgshare.com/i/14kA.svg') repeat-x;
+  background-size: contain;
+  margin: 0;
+  border: none;
+  display: block;
+}
+
+/* NUEVO: ANIMACIÓN DE OLA EN SEPARADORES */
+.animated-wave-separator {
+  width: 100%;
+  height: 48px;
+  background: url('https://svgshare.com/i/14kA.svg') repeat-x;
+  background-size: contain;
+  animation: waveMove 8s linear infinite;
+}
+@keyframes waveMove {
+  0% { background-position-x: 0; }
+  100% { background-position-x: 200px; }
+} 
