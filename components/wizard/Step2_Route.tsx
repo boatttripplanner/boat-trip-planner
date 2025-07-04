@@ -37,7 +37,7 @@ const Step2Route: React.FC<WizardStepProps> = ({ data, updateData, isPrimaryInpu
     } else {
       updateData({ endDate: '' });
     }
-  }, [data.desiredExperienceType, data.startDate, data.numTripDays]);
+  }, [data.desiredExperienceType, data.startDate, data.numTripDays, updateData]);
 
   return (
     <div className="space-y-6 animate-fade-in">

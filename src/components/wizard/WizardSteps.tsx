@@ -6,6 +6,7 @@ import ReviewAndConfirm from "./ReviewAndConfirm";
 import { useWizard } from "./WizardContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaShip, FaCalendarAlt, FaHeart, FaCheckCircle } from 'react-icons/fa';
+import type { Trip } from "../TripCard";
 
 const steps = [
   { label: "Destino", icon: <FaShip className="w-5 h-5" /> },
@@ -16,7 +17,7 @@ const steps = [
 ];
 
 interface WizardStepsProps {
-  onGenerate?: (data: any) => void;
+  onGenerate?: (data: Trip) => void;
 }
 
 export default function WizardSteps({ onGenerate }: WizardStepsProps) {

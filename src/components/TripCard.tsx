@@ -146,7 +146,7 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
       content: (
         <div className="flex flex-col items-center gap-2">
           {typeof trip.mapUrl === 'string' && trip.mapUrl ? (
-            <img src={trip.mapUrl} alt="Mapa de ruta" className="w-full h-40 object-cover rounded-lg" />
+            <Image src={trip.mapUrl} alt="Mapa de ruta" width={400} height={160} className="w-full h-40 object-cover rounded-lg" />
           ) : (
             <div className="w-full h-40 bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-400">[Mapa de ruta aquí]</div>
           )}
@@ -161,7 +161,7 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
         <div className="grid grid-cols-3 gap-2">
           {gallery.length > 0 ? gallery.filter(img => typeof img === 'string').map((img, i) => (
             <div key={i} className="aspect-square bg-cyan-100 rounded-lg overflow-hidden flex items-center justify-center">
-              <img src={img} alt={`Galería ${i + 1}`} className="object-cover w-full h-full" />
+              <Image src={img} alt={`Galería ${i + 1}`} width={100} height={100} className="object-cover w-full h-full" />
             </div>
           )) : Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="aspect-square bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-300">IMG</div>

@@ -203,7 +203,6 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({ label, name, options, se
             checked={selectedValue === option.value}
             onChange={(e) => onChange(e.target.value)}
             className="h-6 w-6 text-primary border-bg-wave focus:ring-2 focus:ring-primary transition-all duration-200 font-bold"
-            aria-required={required}
             disabled={disabled}
           />
           <label htmlFor={`${name}-${option.value}`} className={`ml-4 block text-base font-bold text-primary ${disabled ? 'text-secondary/60' : ''}`}>

@@ -48,13 +48,13 @@ export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
     }
   }, [suggestions, onChange]);
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
     setInputValue(suggestion);
     onChange(suggestion); // Final selection updates form state
     setFilteredSuggestions([]);
     setShowSuggestions(false);
     inputRef.current?.focus();
-  };
+  }, [onChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showSuggestions || filteredSuggestions.length === 0) return;

@@ -1,26 +1,17 @@
-<<<<<<< HEAD
-// import type { NextConfig } from "next";
 import withPWA from 'next-pwa';
+import type { NextConfig } from 'next';
 
-const nextConfig = withPWA({
+const nextConfig: NextConfig = {
+  images: {
+    domains: ['images.pexels.com', 'm.media-amazon.com'],
+  },
+  // Puedes agregar más opciones aquí si lo necesitas
+};
+
+export default withPWA({
+  ...nextConfig,
   dest: 'public',
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
 });
-
-export default {
-  ...nextConfig,
-  images: {
-    domains: ['images.pexels.com', 'm.media-amazon.com'],
-  },
-};
-=======
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
->>>>>>> d5fc395

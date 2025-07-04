@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useId, useMemo } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Image from 'next/image';
 import { Recommendation, AppChatSession, CustomChecklistItem, WeatherData } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
@@ -177,7 +178,7 @@ const WeatherInfoDisplay: React.FC<{
   return (
     <div className="mt-1 mb-4 p-3 bg-teal-50 rounded-md border border-teal-200">
       <h5 className="text-md font-semibold text-teal-800 mb-2 flex items-center">
-        {iconUrl && <img src={iconUrl} alt={weatherData.dayIconPhrase} className="w-8 h-8 mr-2 inline-block" />}
+        {iconUrl && <Image src={iconUrl} alt={weatherData.dayIconPhrase} width={32} height={32} className="mr-2 inline-block" />}
         Pronóstico para {forecastDate} (Fuente: {sourceText})
       </h5>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-700">
@@ -244,7 +245,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         return { mainTitle: undefined, introduction: undefined, sections: [] };
     }
     return parseMarkdownToSections(recommendation.text);
-  }, [recommendation?.text]);
+  }, [recommendation]);
 
   useEffect(() => {
     setCheckedAiItems({});
