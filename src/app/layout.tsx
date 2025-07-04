@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import { AppView } from '../../types';
+import ClientLayout from './ClientLayout';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,27 +36,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Mocks para los props requeridos
-  const headerProps = {
-    title: "BoatTrip Planner",
-    onNavigateHome: () => {},
-    currentView: AppView.MAIN_APP,
-  };
-  const footerProps = {
-    onShowPrivacyPolicy: () => {},
-    onShowTermsOfService: () => {},
-    onNavigateToMainApp: () => {},
-    showAds: false,
-    currentView: AppView.MAIN_APP,
-  };
   return (
     <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-sky-50 text-cyan-900`}
       >
-        <Header {...headerProps} />
-        <main role="main">{children}</main>
-        <Footer {...footerProps} />
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );
