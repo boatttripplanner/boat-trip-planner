@@ -49,32 +49,50 @@ async function getGeminiSections(prompt: string) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { destination, dates, boatType, interests } = body;
-
-  // 1. Clima
-  let weather = null;
   try {
-    weather = await getWeather(destination);
-  } catch {}
+    const body = await req.json();
+    const { destination, dates, boatType, interests } = body;
 
-  // 2. Imagen principal
-  let image = null;
-  try {
-    image = await getPexelsImage(`${destination} ${boatType}`);
-  } catch {}
+    console.log('API generateTrip called with:', { destination, dates, boatType, interests });
 
-  // 3. Galería de imágenes
-  let gallery = [];
-  try {
-    gallery = await getPexelsImages(`${destination} ${boatType}`);
-  } catch {}
+    // 1. Clima
+    let weather = null;
+    let weatherError = null;
+    try {
+      weather = await getWeather(destination);
+      console.log('Weather data retrieved successfully');
+    } catch (error) {
+      weatherError = 'No se pudo obtener información meteorológica';
+      console.error('Weather API error:', error);
+    }
 
-  // 4. Mapa de ruta (placeholder, sin API key)
-  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x300&markers=${encodeURIComponent(destination)}&path=color:0x0099ff|weight:3|${encodeURIComponent(destination)}`;
+    // 2. Imagen principal
+    let image = null;
+    let imageError = null;
+    try {
+      image = await getPexelsImage(`${destination} ${boatType}`);
+      console.log('Main image retrieved successfully');
+    } catch (error) {
+      imageError = 'No se pudo obtener imagen principal';
+      console.error('Pexels API error (main image):', error);
+    }
 
-  // Prompt estructurado para Gemini
-  const geminiPrompt = `Eres un experto en viajes en barco. Genera una recomendación personalizada para un viaje a ${destination} en un ${boatType}, con intereses: ${interests?.join(", ")}. El clima previsto es: ${weather?.[0]?.Day?.IconPhrase || "desconocido"} y temperaturas máximas de ${weather?.[0]?.Temperature?.Maximum?.Value || "-"}°C. Devuelve un JSON con las siguientes claves:
+    // 3. Galería de imágenes
+    let gallery = [];
+    let galleryError = null;
+    try {
+      gallery = await getPexelsImages(`${destination} ${boatType}`);
+      console.log('Gallery images retrieved successfully');
+    } catch (error) {
+      galleryError = 'No se pudo obtener galería de imágenes';
+      console.error('Pexels API error (gallery):', error);
+    }
+
+    // 4. Mapa de ruta (placeholder, sin API key)
+    const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x300&markers=${encodeURIComponent(destination)}&path=color:0x0099ff|weight:3|${encodeURIComponent(destination)}`;
+
+    // Prompt estructurado para Gemini
+    const geminiPrompt = `Eres un experto en viajes en barco. Genera una recomendación personalizada para un viaje a ${destination} en un ${boatType}, con intereses: ${interests?.join(", ")}. El clima previsto es: ${weather?.[0]?.Day?.IconPhrase || "desconocido"} y temperaturas máximas de ${weather?.[0]?.Temperature?.Maximum?.Value || "-"}°C. Devuelve un JSON con las siguientes claves:
 
 {
   "itinerary": "Itinerario diario con rutas, distancias, tiempos, puertos/calas y consejos locales",
@@ -87,21 +105,51 @@ export async function POST(req: NextRequest) {
 
 Responde solo con el JSON, sin explicaciones extra.`;
 
-  let geminiSections = {};
-  try {
-    geminiSections = await getGeminiSections(geminiPrompt);
-    console.log('Gemini response:', geminiSections);
-  } catch {}
+    let geminiSections = {};
+    let geminiError = null;
+    try {
+      geminiSections = await getGeminiSections(geminiPrompt);
+      console.log('Gemini response received:', Object.keys(geminiSections));
+      
+      // Verificar que tenemos contenido útil de Gemini
+      if (!geminiSections || Object.keys(geminiSections).length === 0) {
+        geminiError = 'No se pudo generar contenido personalizado';
+      }
+    } catch (error) {
+      geminiError = 'Error al generar recomendación personalizada';
+      console.error('Gemini API error:', error);
+    }
 
-  return NextResponse.json({
-    destination,
-    dates,
-    boatType,
-    interests,
-    weather,
-    image,
-    gallery,
-    mapUrl,
-    ...geminiSections,
-  });
+    const response = {
+      destination,
+      dates,
+      boatType,
+      interests,
+      weather,
+      image,
+      gallery,
+      mapUrl,
+      ...geminiSections,
+      // Información de errores para debugging
+      errors: {
+        weather: weatherError,
+        image: imageError,
+        gallery: galleryError,
+        gemini: geminiError
+      }
+    };
+
+    console.log('API response prepared successfully');
+    return NextResponse.json(response);
+    
+  } catch (error) {
+    console.error('Unexpected error in generateTrip API:', error);
+    return NextResponse.json(
+      { 
+        error: 'Error interno del servidor. Por favor, inténtalo de nuevo.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: 500 }
+    );
+  }
 } 

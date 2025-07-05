@@ -4,7 +4,7 @@ import { InputField, SelectField } from '../FormControls';
 import { InfoIcon } from '../icons/InfoIcon';
 import { UsersIcon } from '../icons/UsersIcon';
 
-const Step3Crew: React.FC<WizardStepProps> = ({ data, updateData }) => {
+const Step3Crew: React.FC<WizardStepProps> = ({ data, updateData, errors = {} }) => {
   const [showExperienceTooltip, setShowExperienceTooltip] = useState(false);
   const experienceTooltipId = 'experience-tooltip-content-wizard';
 
@@ -24,13 +24,13 @@ const Step3Crew: React.FC<WizardStepProps> = ({ data, updateData }) => {
     <div className="space-y-6 animate-fade-in">
         <div className="text-center">
             <UsersIcon className="mx-auto h-12 w-12 text-teal-500" />
-            <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mt-2">Tu Tripulación</h2>
-            <p className="text-sm sm:text-base text-slate-600">Cuéntanos sobre quiénes irán a bordo.</p>
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mt-2">¿Quién Navegará Contigo?</h2>
+            <p className="text-sm sm:text-base text-slate-600">Cuéntanos sobre tu tripulación para personalizar la experiencia.</p>
         </div>
       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField
-            label="Número de Personas"
+            label="Número de Tripulantes"
             id="numPeople"
             type="number"
             value={data.numPeople > 0 ? data.numPeople.toString() : ''} 
@@ -46,10 +46,11 @@ const Step3Crew: React.FC<WizardStepProps> = ({ data, updateData }) => {
             min="1"
             required
             icon={<UsersIcon className="w-5 h-5 text-primary" />}
+            error={errors.numPeople}
             />
             <div className="relative">
                 <SelectField
-                    label="Nivel de Experiencia Náutica"
+                    label="Tu Experiencia Náutica"
                     id="experience"
                     value={data.experience}
                     onChange={(e) => {
@@ -85,14 +86,18 @@ const Step3Crew: React.FC<WizardStepProps> = ({ data, updateData }) => {
       </div>
       
       {showBoatingLicenseField && (
-        <SelectField
-          label="Titulación Náutica"
-          id="boatingLicense"
-          value={data.boatingLicense || ''}
-          onChange={(e) => updateData({ boatingLicense: e.target.value as BoatingLicenseType })}
-          options={[{value: '', label: 'Selecciona tu titulación...'}, ...boatingLicenseTypeOptions.filter(opt => opt.value !== BoatingLicenseType.NO_LICENSE)]}
-          required={showBoatingLicenseField}
-        />
+        <div className="mt-4 p-4 border border-slate-200 rounded-md bg-slate-50/50">
+            <SelectField
+              label="Tu Titulación Náutica"
+              id="boatingLicense"
+              value={data.boatingLicense || ''}
+              onChange={(e) => updateData({ boatingLicense: e.target.value as BoatingLicenseType })}
+              options={[{value: '', label: 'Selecciona tu titulación...'}, ...boatingLicenseTypeOptions.filter(opt => opt.value !== BoatingLicenseType.NO_LICENSE)]}
+              required={showBoatingLicenseField}
+              error={errors.boatingLicense}
+            />
+            <p className="text-xs text-slate-500 mt-2">Necesario para navegar sin patrón profesional</p>
+        </div>
       )}
     </div>
   );

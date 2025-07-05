@@ -13,7 +13,7 @@ const formatNumberWithDots = (digits: string): string => {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
-const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
+const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData, errors = {} }) => {
   const [showBudgetTooltip, setShowBudgetTooltip] = useState(false);
   const [showActivitiesSection, setShowActivitiesSection] = useState(false);
   const [displayedCustomBudget, setDisplayedCustomBudget] = useState(
@@ -43,14 +43,14 @@ const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
     <div className="space-y-6 animate-fade-in">
         <div className="text-center">
             <CogIcon className="mx-auto h-12 w-12 text-teal-500" />
-            <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mt-2">Preferencias y Presupuesto</h2>
-            <p className="text-sm sm:text-base text-slate-600">Añade los toques finales para un plan perfecto.</p>
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mt-2">Personaliza tu Experiencia</h2>
+            <p className="text-sm sm:text-base text-slate-600">Añade los toques finales para crear tu plan náutico perfecto.</p>
         </div>
 
       <div className="space-y-4">
         <div className="relative">
           <SelectField
-            label="Nivel de Presupuesto (Opcional)"
+            label="Presupuesto Estimado (Opcional)"
             id="budgetLevel"
             value={data.budgetLevel || ''}
             onChange={(e) => updateData({ budgetLevel: e.target.value as BudgetLevel | undefined, customBudgetAmount: undefined })}
@@ -73,13 +73,13 @@ const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
                    className="absolute z-20 w-80 p-3 mt-1 text-sm text-white bg-slate-700 rounded-md shadow-lg right-0 sm:left-1/2 sm:-translate-x-1/2"
                    onClick={() => setShowBudgetTooltip(false)}
                    role="tooltip">
-                Indica un presupuesto para ayudarnos a personalizar tu plan: desde opciones económicas hasta experiencias de lujo.
+                Indica tu presupuesto para ayudarnos a personalizar tu plan: desde opciones económicas hasta experiencias de lujo.
               </div>
           )}
         </div>
         {data.budgetLevel === BudgetLevel.SPECIFIC_AMOUNT && (
           <InputField
-            label="Monto del Presupuesto (EUR)"
+            label="Tu Presupuesto en EUR"
             id="customBudgetAmount"
             type="text" 
             value={displayedCustomBudget}
@@ -88,14 +88,15 @@ const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
             required
             inputMode="numeric" 
             icon={<SparklesIcon className="w-5 h-5 text-accent" />}
+            error={errors.customBudgetAmount}
           />
         )}
         <TextAreaField
-          label="Notas Adicionales sobre tu Viaje (Opcional)"
+          label="Notas Especiales (Opcional)"
           id="budgetNotes"
           value={data.budgetNotes || ''}
           onChange={(e) => updateData({ budgetNotes: e.target.value })}
-          placeholder="Ej: Preferencias alimentarias, celebraciones especiales, restricciones, etc."
+          placeholder="Ej: Preferencias alimentarias, celebraciones especiales, restricciones, necesidades especiales, etc."
           rows={2}
         />
       </div>
@@ -108,7 +109,7 @@ const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
             aria-expanded={showActivitiesSection}
             aria-controls="activities-collapsible-section"
         >
-            <h3 className="text-md font-medium">Actividades Deseadas (Opcional)</h3>
+            <h3 className="text-md font-medium">🎯 Actividades que Te Interesan (Opcional)</h3>
             <ChevronIcon isOpen={showActivitiesSection} className="w-5 h-5 text-slate-600" aria-hidden="true" />
         </button>
         {showActivitiesSection && (
@@ -116,6 +117,7 @@ const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
               id="activities-collapsible-section"
               className="space-y-4 pl-3 ml-1 pt-2 pb-1 border-l-2 border-slate-200"
             >
+                <p className="text-xs text-slate-500 mb-2">Selecciona las actividades que más te interesan para personalizar tu itinerario</p>
                 <CheckboxGroup
                     label="" 
                     options={activityOptions}
@@ -123,11 +125,11 @@ const Step4Preferences: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     onChange={handleActivityChange}
                 />
                 <TextAreaField
-                    label="Otras Actividades o Solicitudes Especiales (Opcional)"
+                    label="Actividades Especiales o Solicitudes (Opcional)"
                     id="otherActivities"
                     value={data.otherActivities || ''}
                     onChange={(e) => updateData({ otherActivities: e.target.value })}
-                    placeholder="Ej: Celebrar un cumpleaños, equipo de snorkel para niños, etc."
+                    placeholder="Ej: Celebrar un cumpleaños, equipo de snorkel para niños, ruta específica, etc."
                     rows={2}
                 />
             </div>

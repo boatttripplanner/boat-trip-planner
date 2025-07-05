@@ -20,8 +20,8 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({ steps, currentStep })
   ];
 
   return (
-    <nav aria-label="Progreso del formulario" className="mb-10">
-      <ol className="flex items-center justify-between gap-4">
+    <nav aria-label="Progreso del formulario" className="mb-6 sm:mb-10">
+      <ol className="flex items-center justify-between gap-2 sm:gap-4">
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCompleted = currentStep > stepNumber;
@@ -34,7 +34,7 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({ steps, currentStep })
                   <div className={`flex-1 h-1 rounded-full transition-all duration-300 ${isCompleted ? 'bg-primary' : 'bg-slate-200'}`}></div>
                 )}
                 <span
-                  className={`flex items-center justify-center w-10 h-10 rounded-full text-xl font-bold shadow border-2 transition-all duration-300 font-bold bg-white ${isCurrent ? 'border-primary text-primary' : isCompleted ? 'border-accent text-accent' : 'border-slate-200 text-slate-400'}`}
+                  className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-lg sm:text-xl font-bold shadow border-2 transition-all duration-300 font-bold bg-white ${isCurrent ? 'border-primary text-primary' : isCompleted ? 'border-accent text-accent' : 'border-slate-200 text-slate-400'}`}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
                   {isCurrent ? stepIcons[index] : stepNumber}
@@ -43,7 +43,8 @@ const ProgressStepper: React.FC<ProgressStepperProps> = ({ steps, currentStep })
                   <div className={`flex-1 h-1 rounded-full transition-all duration-300 ${currentStep > stepNumber + 1 ? 'bg-primary' : 'bg-slate-200'}`}></div>
                 )}
               </div>
-              <p className={`mt-4 text-base font-bold text-center ${isCurrent ? 'text-primary' : isCompleted ? 'text-accent' : 'text-slate-400'}`}>{step}</p>
+              <p className={`mt-2 sm:mt-4 text-xs sm:text-base font-bold text-center hidden sm:block ${isCurrent ? 'text-primary' : isCompleted ? 'text-accent' : 'text-slate-400'}`}>{step}</p>
+              <p className={`mt-2 sm:mt-4 text-xs font-bold text-center sm:hidden ${isCurrent ? 'text-primary' : isCompleted ? 'text-accent' : 'text-slate-400'}`}>{stepNumber}</p>
             </li>
           );
         })}

@@ -6,6 +6,7 @@ interface AutocompleteInputFieldProps extends Omit<React.InputHTMLAttributes<HTM
   value: string;
   onChange: (value: string) => void;
   suggestions: string[];
+  error?: string;
 }
 
 export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
@@ -17,6 +18,7 @@ export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
   required,
   placeholder,
   disabled,
+  error,
   ...props
 }) => {
   const [inputValue, setInputValue] = useState(value);
@@ -138,7 +140,7 @@ export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
                 setShowSuggestions(true);
              }
         }}
-        className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-base text-slate-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none placeholder:text-slate-500"
+        className={`mt-1 block w-full px-3 py-2 bg-white border rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-base text-slate-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none placeholder:text-slate-500 ${error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-slate-300'}`}
         placeholder={placeholder}
         required={required}
         disabled={disabled}
@@ -149,7 +151,7 @@ export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
       {showSuggestions && filteredSuggestions.length > 0 && (
         <ul 
           ref={suggestionsRef}
-          className="absolute z-10 w-full bg-white border border-slate-300 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto"
+          className="absolute z-10 w-full bg-white border border-slate-300 rounded-md shadow-lg mt-1 max-h-40 sm:max-h-60 overflow-y-auto"
           role="listbox"
           aria-labelledby={`${id}-label`}
         >
@@ -158,7 +160,7 @@ export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
               key={suggestion}
               onClick={() => handleSuggestionClick(suggestion)}
               onMouseEnter={() => setActiveSuggestionIndex(index)}
-              className={`px-3 py-2 cursor-pointer hover:bg-teal-100 text-slate-700 text-sm ${
+              className={`px-2 sm:px-3 py-1.5 sm:py-2 cursor-pointer hover:bg-teal-100 text-slate-700 text-xs sm:text-sm ${
                 index === activeSuggestionIndex ? 'bg-teal-100' : ''
               }`}
               role="option"
@@ -169,6 +171,16 @@ export const AutocompleteInputField: React.FC<AutocompleteInputFieldProps> = ({
             </li>
           ))}
         </ul>
+      )}
+      {error && (
+        <div className="text-red-500 text-xs sm:text-sm mt-1 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          {error}
+        </div>
       )}
     </div>
   );

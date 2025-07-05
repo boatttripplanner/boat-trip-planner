@@ -1,5 +1,3 @@
-
-
 import type { Chat } from "@google/genai";
 
 export interface BoatTransferDetails {
@@ -232,6 +230,7 @@ export interface WizardStepProps {
   updateData: (fields: Partial<UserPreferences>) => void;
   isPrimaryInputDisabled: boolean;
   onReconsiderCookies: () => void;
+  errors?: { [key: string]: string };
 }
 
 export interface WizardNavigationProps {

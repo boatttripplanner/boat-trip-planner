@@ -12,22 +12,18 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   // Event handlers para Header y Footer
   const handleNavigateHome = () => {
     // Implementar navegación a home
-    console.log('Navigate to home');
   };
 
   const handleShowPrivacyPolicy = () => {
     // Implementar mostrar política de privacidad
-    console.log('Show privacy policy');
   };
 
   const handleShowTermsOfService = () => {
     // Implementar mostrar términos de servicio
-    console.log('Show terms of service');
   };
 
   const handleNavigateToMainApp = () => {
     // Implementar navegación a la app principal
-    console.log('Navigate to main app');
   };
 
   const headerProps = {

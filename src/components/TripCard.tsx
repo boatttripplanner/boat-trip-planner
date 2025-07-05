@@ -76,6 +76,9 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
   // Galería de imágenes
   const gallery: string[] = Array.isArray(trip.gallery) ? trip.gallery : [];
 
+  // Verificar si hay errores de la API
+  const apiErrors = trip.errors as { weather?: string; image?: string; gallery?: string; gemini?: string } | undefined;
+
   // Itinerario: intentar parsear a array de días si es posible
   let itineraryDays: { day: string; text: string }[] = [];
   if (typeof trip.itinerary === "string") {
@@ -119,7 +122,20 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
                 h3: (props) => <h3 className="text-cyan-700 font-bold text-lg mt-4 mb-2" {...props} />,
               }}>{dia.text}</ReactMarkdown>
             </div>
-          )) : <div className="text-cyan-600 text-sm">No hay itinerario disponible.</div>}
+          )) : (
+            <div className="text-center py-4">
+              <div className="text-cyan-600 text-sm mb-2">
+                {apiErrors?.gemini ? (
+                  <span className="text-red-600">⚠️ {apiErrors.gemini}</span>
+                ) : (
+                  "No hay itinerario disponible."
+                )}
+              </div>
+              <button className="text-cyan-700 hover:text-cyan-800 text-sm underline">
+                Intentar generar de nuevo
+              </button>
+            </div>
+          )}
         </div>
       ),
     },
@@ -136,7 +152,17 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
                 <div className="text-cyan-600 text-sm">{w.Day?.LongPhrase || "Sin alertas meteorológicas"}</div>
               </div>
             </div>
-          )) : <div className="text-cyan-600 text-sm">No hay datos meteorológicos.</div>}
+          )) : (
+            <div className="text-center py-4">
+              <div className="text-cyan-600 text-sm mb-2">
+                {apiErrors?.weather ? (
+                  <span className="text-red-600">⚠️ {apiErrors.weather}</span>
+                ) : (
+                  "No hay datos meteorológicos."
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ),
     },
@@ -158,14 +184,22 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
       title: "Galería de imágenes",
       icon: <FiImage className="w-5 h-5 text-cyan-400" />,
       content: (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {gallery.length > 0 ? gallery.filter(img => typeof img === 'string').map((img, i) => (
             <div key={i} className="aspect-square bg-cyan-100 rounded-lg overflow-hidden flex items-center justify-center">
               <Image src={img} alt={`Galería ${i + 1}`} width={100} height={100} className="object-cover w-full h-full" />
             </div>
-          )) : Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-300">IMG</div>
-          ))}
+          )) : (
+            <div className="col-span-2 sm:col-span-3 text-center py-4">
+              <div className="text-cyan-600 text-sm mb-2">
+                {apiErrors?.gallery ? (
+                  <span className="text-red-600">⚠️ {apiErrors.gallery}</span>
+                ) : (
+                  "No hay imágenes disponibles."
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ),
     },
@@ -201,11 +235,11 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
       title: "Productos recomendados",
       icon: <FiShoppingBag className="w-5 h-5 text-cyan-400" />,
       content: (
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {[1,2,3].map(i => (
-            <div key={i} className="min-w-[120px] bg-cyan-50 rounded-lg p-2 border border-cyan-100 flex flex-col items-center">
-              <div className="w-16 h-16 bg-cyan-100 rounded mb-2 flex items-center justify-center text-cyan-300">IMG</div>
-              <div className="text-xs text-cyan-800 font-semibold">Producto {i}</div>
+            <div key={i} className="min-w-[100px] sm:min-w-[120px] bg-cyan-50 rounded-lg p-2 border border-cyan-100 flex flex-col items-center flex-shrink-0">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-cyan-100 rounded mb-2 flex items-center justify-center text-cyan-300 text-xs sm:text-sm">IMG</div>
+              <div className="text-xs text-cyan-800 font-semibold text-center">Producto {i}</div>
               <a href="#" className="text-cyan-600 text-xs hover:underline mt-1">Ver en Amazon</a>
             </div>
           ))}
@@ -262,19 +296,26 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
       }}
     >
       {/* Imagen principal */}
-      {trip.image && (
+      {trip.image ? (
         <div className="relative w-full h-48" style={{ background: 'linear-gradient(90deg, #0a2540 0%, #1976d2 100%)' }}>
           <Image
             src={trip.image}
             alt={trip.destination}
             fill
-            className="object-cover w-full h-full opacity-90"
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, 800px"
+            className="object-cover"
           />
-          <div className="absolute top-2 left-2 bg-white/80 rounded-full px-3 py-1 text-2xl shadow flex items-center gap-2">
-            <FaShip className="text-blue-700" />
-            {boatIcon}
+        </div>
+      ) : (
+        <div className="relative w-full h-48 flex items-center justify-center" style={{ background: 'linear-gradient(90deg, #0a2540 0%, #1976d2 100%)' }}>
+          <div className="text-white text-center">
+            <div className="text-2xl mb-2">🌊</div>
+            <div className="text-sm opacity-80">
+              {apiErrors?.image ? (
+                <span className="text-red-300">⚠️ {apiErrors.image}</span>
+              ) : (
+                "Imagen no disponible"
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -286,33 +327,33 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
         </div>
       )}
       {/* Resumen general */}
-      <div className="p-6 flex flex-col gap-2 border-b border-cyan-100" style={{ background: 'linear-gradient(90deg, #e3f2fd 0%, #f0f9fa 100%)', fontWeight: 600 }}>
-        <div className="flex items-center gap-2 text-cyan-800 text-2xl font-bold">
-          <FaMapMarkedAlt className="w-7 h-7 text-blue-500" />
+      <div className="p-4 sm:p-6 flex flex-col gap-2 border-b border-cyan-100" style={{ background: 'linear-gradient(90deg, #e3f2fd 0%, #f0f9fa 100%)', fontWeight: 600 }}>
+        <div className="flex items-center gap-2 text-cyan-800 text-xl sm:text-2xl font-bold">
+          <FaMapMarkedAlt className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500" />
           {trip.destination}
         </div>
-        <div className="text-cyan-700 text-base flex flex-wrap gap-2 items-center">
-          <FaCloudSun className="w-5 h-5 inline-block mr-1 text-blue-400" />
-          {trip.dates?.start} - {trip.dates?.end}
+        <div className="text-cyan-700 text-sm sm:text-base flex flex-wrap gap-2 items-center">
+          <FaCloudSun className="w-4 h-4 sm:w-5 sm:h-5 inline-block mr-1 text-blue-400" />
+          <span className="break-words">{trip.dates?.start} - {trip.dates?.end}</span>
           {duration && <span className="ml-2">({duration} días)</span>}
-          <span className="ml-4"><b>Barco:</b> <FaShip className="inline-block text-blue-700 mr-1" /> {boatIcon} {trip.boatType}</span>
+          <span className="ml-2 sm:ml-4"><b>Barco:</b> <FaShip className="inline-block text-blue-700 mr-1" /> {boatIcon} {trip.boatType}</span>
         </div>
-        <div className="text-cyan-700 text-base">
-          <b>Intereses:</b> {(trip.interests || []).join(", ")}
+        <div className="text-cyan-700 text-sm sm:text-base">
+          <b>Intereses:</b> <span className="break-words">{(trip.interests || []).join(", ")}</span>
         </div>
-        <div className="text-cyan-800 italic mt-2">Tu viaje de {duration || "X"} días en {trip.boatType} por {trip.destination}. Enfocado en {(trip.interests || []).join(", ")}.</div>
-        <div className="flex gap-2 mt-3">
-          <button className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-lg text-sm transition-all"><FaStarSolid className="w-4 h-4" />Editar viaje</button>
+        <div className="text-cyan-800 italic mt-2 text-sm sm:text-base">Tu viaje de {duration || "X"} días en {trip.boatType} por {trip.destination}. Enfocado en {(trip.interests || []).join(", ")}.</div>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <button className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-all"><FaStarSolid className="w-3 h-3 sm:w-4 sm:h-4" />Editar viaje</button>
         </div>
       </div>
       {/* Acordeón de secciones */}
       <Accordion sections={sections} />
       {/* Acciones usuario */}
-      <div className="flex flex-wrap gap-2 justify-end px-6 py-4 border-t border-cyan-100 mt-2 bg-white/70 backdrop-blur-md">
-        <button className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-lg text-sm transition-all"><FaSyncAlt className="w-4 h-4" />Volver a empezar</button>
-        <button className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-lg text-sm transition-all"><FaStarSolid className="w-4 h-4" />Editar viaje</button>
-        <button className="flex items-center gap-1 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-3 py-1 rounded-lg text-sm transition-all"><FaCameraRetro className="w-4 h-4" />Guardar PDF</button>
-        <button className="flex items-center gap-1 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-3 py-1 rounded-lg text-sm transition-all"><FaMapMarkedAlt className="w-4 h-4" />Ver ruta en mapa</button>
+      <div className="flex flex-wrap gap-2 justify-center sm:justify-end px-4 sm:px-6 py-4 border-t border-cyan-100 mt-2 bg-white/70 backdrop-blur-md">
+        <button className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-all"><FaSyncAlt className="w-3 h-3 sm:w-4 sm:h-4" />Volver a empezar</button>
+        <button className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-all"><FaStarSolid className="w-3 h-3 sm:w-4 sm:h-4" />Editar viaje</button>
+        <button className="flex items-center gap-1 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-all"><FaCameraRetro className="w-3 h-3 sm:w-4 sm:h-4" />Guardar PDF</button>
+        <button className="flex items-center gap-1 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm transition-all"><FaMapMarkedAlt className="w-3 h-3 sm:w-4 sm:h-4" />Ver ruta en mapa</button>
       </div>
     </motion.div>
   );

@@ -5,7 +5,7 @@ import { AutocompleteInputField } from '../AutocompleteInputField';
 import { boatDatabase } from '../../data/boatModels';
 import { BoatOutlineIcon } from '../icons/BoatOutlineIcon';
 
-const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
+const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData, errors = {} }) => {
     const boatModelSuggestions = useMemo(() => boatDatabase.map(b => b.displayName), []);
     
     const isRequired = useMemo(() => 
@@ -62,6 +62,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                 suggestions={boatModelSuggestions}
                 placeholder="Ej: Beneteau Oceanis 46.1 (autocompletar)"
                 required={isRequired}
+                error={errors.model}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField 
@@ -73,6 +74,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     type="text"
                     required={isRequired}
                     icon={<BoatOutlineIcon className="w-5 h-5 text-primary" />}
+                    error={errors.length}
                 />
                 <InputField 
                     label="Manga (metros)" 
@@ -83,6 +85,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     type="text" 
                     required={isRequired}
                     icon={<BoatOutlineIcon className="w-5 h-5 text-primary" />}
+                    error={errors.beam}
                 />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -95,6 +98,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     type="text" 
                     required={isRequired}
                     icon={<BoatOutlineIcon className="w-5 h-5 text-primary" />}
+                    error={errors.draft}
                 />
                 <InputField 
                     label="Velocidad de Crucero (nudos)" 
@@ -105,6 +109,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     type="text" 
                     required={isRequired}
                     icon={<BoatOutlineIcon className="w-5 h-5 text-primary" />}
+                    error={errors.cruisingSpeed}
                 />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -117,6 +122,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     type="text" 
                     required={isRequired}
                     icon={<BoatOutlineIcon className="w-5 h-5 text-primary" />}
+                    error={errors.tankCapacity}
                 />
                 <InputField 
                     label="Consumo Medio (litros/hora)" 
@@ -127,6 +133,7 @@ const Step5BoatDetails: React.FC<WizardStepProps> = ({ data, updateData }) => {
                     type="text" 
                     required={isRequired}
                     icon={<BoatOutlineIcon className="w-5 h-5 text-primary" />}
+                    error={errors.averageConsumption}
                 />
             </div>
         </div>

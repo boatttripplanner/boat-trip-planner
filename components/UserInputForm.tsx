@@ -35,6 +35,9 @@ const UserInputForm: React.FC<UserInputFormProps> = ({ onSubmit, isLoading, cook
     boatTransferDetails: {},
   });
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
   const isPrimaryInputDisabled = cookieConsent !== CookieConsentStatus.ACCEPTED;
 
   const showBoatSpecsStep = useMemo(() => {
@@ -73,55 +76,56 @@ const UserInputForm: React.FC<UserInputFormProps> = ({ onSubmit, isLoading, cook
   };
 
   const handleNext = () => {
-    // Step validation logic
-    if (currentStep === 1) { // Experiencia
-       // No mandatory fields here to validate
-    } else if (currentStep === 2) { // Ruta
-        if (!formData.destination.trim()) {
-            alert(formData.desiredExperienceType === DesiredExperienceType.TRANSFER ? "Por favor, introduce el puerto de origen." : "Por favor, introduce el puerto de salida.");
-            return;
-        }
-        if (formData.desiredExperienceType === DesiredExperienceType.MULTI_DAY) {
-            if (!formData.numTripDays || formData.numTripDays < 2) {
-                alert("Para 'Varios Días', el número de días debe ser al menos 2.");
-                return;
-            }
-            if(!formData.isSamePortForMultiDay && !(formData.arrivalPortForMultiDay ?? '').trim()) {
-                alert("Por favor, introduce el puerto de llegada para tu viaje.");
-                return;
-            }
-        }
-        if (formData.desiredExperienceType === DesiredExperienceType.TRANSFER && !(formData.transferDestinationPort ?? '').trim()) {
-            alert("Por favor, introduce el puerto de destino para el traslado.");
-            return;
-        }
-    } else if (currentStep === 3) { // Tripulación
-        if (!formData.numPeople || formData.numPeople <= 0) {
-            alert("El número de personas debe ser mayor que 0.");
-            return;
-        }
-        const needsLicense = formData.experience === ExperienceLevel.EXPERIENCED_WITH_LICENSE_NO_SKIPPER || formData.experience === ExperienceLevel.EXPERT_ADVANCED_LICENSE || formData.planningMode === PlanningMode.OWN_BOAT;
-        if (needsLicense && !formData.boatingLicense) {
-            alert("Por favor, selecciona tu titulación náutica.");
-            return;
-        }
-    } else if (currentStep === 4) { // Preferencias
-      if (formData.budgetLevel === 'specific_amount' && (!formData.customBudgetAmount || formData.customBudgetAmount <= 0)) {
-        alert("Por favor, introduce un monto de presupuesto válido.");
-        return;
+    const newErrors: { [key: string]: string } = {};
+    setGeneralError(null);
+
+    if (currentStep === 1) {
+      // No mandatory fields here to validate
+    } else if (currentStep === 2) {
+      if (!formData.destination.trim()) {
+        newErrors.destination = formData.desiredExperienceType === DesiredExperienceType.TRANSFER ? "Por favor, introduce el puerto de origen." : "Por favor, introduce el puerto de salida.";
       }
-    } else if (currentStep === 5 && showBoatSpecsStep) { // Barco
-        const details = formData.boatTransferDetails;
-        const requiredForOwnBoatOrTransfer = formData.planningMode === PlanningMode.OWN_BOAT || formData.desiredExperienceType === DesiredExperienceType.TRANSFER;
-        if (requiredForOwnBoatOrTransfer) {
-            if (!details?.model?.trim()) { alert("Por favor, introduce el modelo de tu barco."); return; }
-            if (!details?.length?.trim()) { alert("Por favor, introduce la eslora de tu barco."); return; }
-            if (!details?.beam?.trim()) { alert("Por favor, introduce la manga de tu barco."); return; }
-            if (!details?.draft?.trim()) { alert("Por favor, introduce el calado de tu barco."); return; }
-            if (!details?.cruisingSpeed?.trim()) { alert("Por favor, introduce la velocidad de crucero."); return; }
-            if (!details?.tankCapacity?.trim()) { alert("Por favor, introduce la capacidad del depósito."); return; }
-            if (!details?.averageConsumption?.trim()) { alert("Por favor, introduce el consumo medio."); return; }
+      if (formData.desiredExperienceType === DesiredExperienceType.MULTI_DAY) {
+        if (!formData.numTripDays || formData.numTripDays < 2) {
+          newErrors.numTripDays = "Para 'Varios Días', el número de días debe ser al menos 2.";
         }
+        if (!formData.isSamePortForMultiDay && !(formData.arrivalPortForMultiDay ?? '').trim()) {
+          newErrors.arrivalPortForMultiDay = "Por favor, introduce el puerto de llegada para tu viaje.";
+        }
+      }
+      if (formData.desiredExperienceType === DesiredExperienceType.TRANSFER && !(formData.transferDestinationPort ?? '').trim()) {
+        newErrors.transferDestinationPort = "Por favor, introduce el puerto de destino para el traslado.";
+      }
+    } else if (currentStep === 3) {
+      if (!formData.numPeople || formData.numPeople <= 0) {
+        newErrors.numPeople = "El número de personas debe ser mayor que 0.";
+      }
+      const needsLicense = formData.experience === ExperienceLevel.EXPERIENCED_WITH_LICENSE_NO_SKIPPER || formData.experience === ExperienceLevel.EXPERT_ADVANCED_LICENSE || formData.planningMode === PlanningMode.OWN_BOAT;
+      if (needsLicense && !formData.boatingLicense) {
+        newErrors.boatingLicense = "Por favor, selecciona tu titulación náutica.";
+      }
+    } else if (currentStep === 4) {
+      if (formData.budgetLevel === 'specific_amount' && (!formData.customBudgetAmount || formData.customBudgetAmount <= 0)) {
+        newErrors.customBudgetAmount = "Por favor, introduce un monto de presupuesto válido.";
+      }
+    } else if (currentStep === 5 && showBoatSpecsStep) {
+      const details = formData.boatTransferDetails;
+      const requiredForOwnBoatOrTransfer = formData.planningMode === PlanningMode.OWN_BOAT || formData.desiredExperienceType === DesiredExperienceType.TRANSFER;
+      if (requiredForOwnBoatOrTransfer) {
+        if (!details?.model?.trim()) { newErrors.model = "Por favor, introduce el modelo de tu barco."; }
+        if (!details?.length?.trim()) { newErrors.length = "Por favor, introduce la eslora de tu barco."; }
+        if (!details?.beam?.trim()) { newErrors.beam = "Por favor, introduce la manga de tu barco."; }
+        if (!details?.draft?.trim()) { newErrors.draft = "Por favor, introduce el calado de tu barco."; }
+        if (!details?.cruisingSpeed?.trim()) { newErrors.cruisingSpeed = "Por favor, introduce la velocidad de crucero."; }
+        if (!details?.tankCapacity?.trim()) { newErrors.tankCapacity = "Por favor, introduce la capacidad del depósito."; }
+        if (!details?.averageConsumption?.trim()) { newErrors.averageConsumption = "Por favor, introduce el consumo medio."; }
+      }
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setGeneralError("Por favor, corrige los errores antes de continuar.");
+      return;
     }
 
     if (currentStep < totalSteps) {
@@ -174,10 +178,23 @@ const UserInputForm: React.FC<UserInputFormProps> = ({ onSubmit, isLoading, cook
 
 
   return (
-    <form onSubmit={handleSubmit} className="card bg-white border border-border rounded-xl max-w-2xl mx-auto p-6 md:p-8" style={{position:'relative', zIndex:5}}>
+    <form onSubmit={handleSubmit} className="card bg-white border border-border rounded-xl max-w-2xl mx-auto p-4 sm:p-6 md:p-8" style={{position:'relative', zIndex:5}}>
         <ProgressStepper steps={stepDetails.map(s => s.name)} currentStep={currentStep} />
-        <div className="mt-6 transition-all duration-200">
-            {renderStep()}
+        {generalError && (
+          <div className="mb-4">
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 rounded-md" role="alert">
+              <div className="flex">
+                <div className="py-1"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mr-2 sm:mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                <div>
+                  <p className="font-bold text-sm sm:text-base">Error</p>
+                  <p className="text-xs sm:text-sm">{generalError}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="mt-4 sm:mt-6 transition-all duration-200">
+          {React.cloneElement(renderStep(), { errors })}
         </div>
 
         {currentStep < totalSteps ? (
@@ -189,11 +206,11 @@ const UserInputForm: React.FC<UserInputFormProps> = ({ onSubmit, isLoading, cook
                 isLoading={isLoading}
             />
         ) : (
-             <div className="flex justify-between items-center pt-6 border-t border-border mt-6">
-                <Button type="button" onClick={handleBack} variant="secondary" className="px-5 py-2 text-base font-semibold">
+             <div className="flex flex-col sm:flex-row justify-between items-center pt-4 sm:pt-6 border-t border-border mt-4 sm:mt-6 gap-4">
+                <Button type="button" onClick={handleBack} variant="secondary" className="px-4 sm:px-5 py-2 text-sm sm:text-base font-semibold w-full sm:w-auto">
                     &larr; Atrás
                 </Button>
-                <Button type="submit" disabled={isLoading || isPrimaryInputDisabled} className="px-7 py-2 text-base font-semibold bg-primary text-white rounded-full w-full sm:w-auto mt-4 sm:mt-0">
+                <Button type="submit" disabled={isLoading || isPrimaryInputDisabled} className="px-6 sm:px-7 py-2 text-sm sm:text-base font-semibold bg-primary text-white rounded-full w-full sm:w-auto">
                     {isLoading ? 'Trazando Rumbo...' : 'Obtener Recomendaciones'}
                 </Button>
             </div>
