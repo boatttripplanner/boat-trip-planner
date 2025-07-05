@@ -33,6 +33,7 @@ async function getPexelsImage(query: string) {
 }
 
 async function getGeminiSections(prompt: string) {
+  console.log('Llamando a Gemini API con prompt:', prompt);
   const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -40,11 +41,13 @@ async function getGeminiSections(prompt: string) {
   });
   const data = await res.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  // Intentar parsear las secciones como JSON si es posible
+  console.log('Respuesta cruda de Gemini:', text);
   try {
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    if (!parsed.itinerary) parsed.itinerary = "";
+    return parsed;
   } catch {
-    return { description: text };
+    return { itinerary: "", description: text };
   }
 }
 
@@ -92,10 +95,13 @@ export async function POST(req: NextRequest) {
     const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x300&markers=${encodeURIComponent(destination)}&path=color:0x0099ff|weight:3|${encodeURIComponent(destination)}`;
 
     // Prompt estructurado para Gemini
-    const geminiPrompt = `Eres un experto en viajes en barco. Genera una recomendación personalizada para un viaje a ${destination} en un ${boatType}, con intereses: ${interests?.join(", ")}. El clima previsto es: ${weather?.[0]?.Day?.IconPhrase || "desconocido"} y temperaturas máximas de ${weather?.[0]?.Temperature?.Maximum?.Value || "-"}°C. Devuelve un JSON con las siguientes claves:
+    const geminiPrompt = `
+Eres un experto en viajes en barco. Genera una recomendación personalizada para un viaje a ${destination} en un ${boatType}, con intereses: ${interests?.join(", ")}. El clima previsto es: ${weather?.[0]?.Day?.IconPhrase || "desconocido"} y temperaturas máximas de ${weather?.[0]?.Temperature?.Maximum?.Value || "-"}°C.
+
+Devuelve SOLO un JSON válido con las siguientes claves (todas obligatorias, aunque alguna quede vacía):
 
 {
-  "itinerary": "Itinerario diario con rutas, distancias, tiempos, puertos/calas y consejos locales",
+  "itinerary": "Itinerario diario con rutas, distancias, tiempos, puertos/calas y consejos locales. Si no puedes generar un itinerario, pon un string vacío.",
   "weatherTips": "Consejos y advertencias meteorológicas para la ruta",
   "recommendedStops": "Playas, calas, restaurantes, puntos de interés, spots de deportes acuáticos",
   "practicalTips": "Consejos prácticos: combustible, agua, provisiones, tarifas, reglas locales",
@@ -103,17 +109,29 @@ export async function POST(req: NextRequest) {
   "experience": "Frase emocional sobre el tipo de experiencia que vivirá el usuario"
 }
 
-Responde solo con el JSON, sin explicaciones extra.`;
+Responde SOLO con el JSON, sin explicaciones extra.
+`;
+
+    // LOG: Prompt enviado a Gemini
+    console.log('Gemini PROMPT:', geminiPrompt);
 
     let geminiSections = {};
+    let geminiRawResponse = null;
     let geminiError = null;
     try {
-      geminiSections = await getGeminiSections(geminiPrompt);
-      console.log('Gemini response received:', Object.keys(geminiSections));
-      
+      geminiRawResponse = await getGeminiSections(geminiPrompt);
+      // LOG: Respuesta cruda de Gemini
+      console.log('Gemini RAW RESPONSE:', JSON.stringify(geminiRawResponse));
+      geminiSections = geminiRawResponse;
+      // LOG: Objeto parseado de Gemini
+      console.log('Gemini PARSED OBJECT:', geminiSections);
       // Verificar que tenemos contenido útil de Gemini
       if (!geminiSections || Object.keys(geminiSections).length === 0) {
         geminiError = 'No se pudo generar contenido personalizado';
+        console.warn('Gemini: No se pudo generar contenido personalizado');
+      }
+      if (!(geminiSections as any).itinerary) {
+        console.warn('Gemini: El itinerario está vacío o no existe en la respuesta.');
       }
     } catch (error) {
       geminiError = 'Error al generar recomendación personalizada';

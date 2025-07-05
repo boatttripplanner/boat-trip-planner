@@ -111,7 +111,7 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
       icon: <FiMap className="w-5 h-5 text-cyan-400" />,
       content: (
         <div className="flex flex-col gap-2">
-          {itineraryDays.length > 0 ? itineraryDays.map((dia, idx) => (
+          {itineraryDays.length > 0 && itineraryDays[0].text.trim() !== "" ? itineraryDays.map((dia, idx) => (
             <div key={idx} className="bg-cyan-50 rounded-lg p-3 border border-cyan-100">
               <div className="font-semibold text-cyan-700 mb-1">{dia.day}</div>
               <ReactMarkdown components={{
@@ -127,13 +127,17 @@ export default function TripCard({ trip, isPremium }: TripCardProps) {
               <div className="text-cyan-600 text-sm mb-2">
                 {apiErrors?.gemini ? (
                   <span className="text-red-600">⚠️ {apiErrors.gemini}</span>
+                ) : trip.itinerary === "" ? (
+                  "No hay itinerario disponible para este destino o parámetros. Prueba con otros datos o reintenta más tarde."
                 ) : (
                   "No hay itinerario disponible."
                 )}
               </div>
-              <button className="text-cyan-700 hover:text-cyan-800 text-sm underline">
-                Intentar generar de nuevo
-              </button>
+              {!apiErrors?.gemini && (
+                <button className="text-cyan-700 hover:text-cyan-800 text-sm underline">
+                  Intentar generar de nuevo
+                </button>
+              )}
             </div>
           )}
         </div>
