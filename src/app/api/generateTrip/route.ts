@@ -4,6 +4,11 @@ const ACCUWEATHER_API_KEY = process.env.ACCUWEATHER_API_KEY;
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+type GeminiSections = {
+  itinerary?: string;
+  [key: string]: unknown;
+};
+
 async function getWeather(destination: string) {
   // 1. Buscar location key de AccuWeather
   const locRes = await fetch(`http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${ACCUWEATHER_API_KEY}&q=${encodeURIComponent(destination)}`);
@@ -115,7 +120,7 @@ Responde SOLO con el JSON, sin explicaciones extra.
     // LOG: Prompt enviado a Gemini
     console.log('Gemini PROMPT:', geminiPrompt);
 
-    let geminiSections = {};
+    let geminiSections: GeminiSections = {};
     let geminiRawResponse = null;
     let geminiError = null;
     try {
@@ -130,7 +135,7 @@ Responde SOLO con el JSON, sin explicaciones extra.
         geminiError = 'No se pudo generar contenido personalizado';
         console.warn('Gemini: No se pudo generar contenido personalizado');
       }
-      if (!(geminiSections as any).itinerary) {
+      if (!geminiSections.itinerary) {
         console.warn('Gemini: El itinerario está vacío o no existe en la respuesta.');
       }
     } catch (error) {
