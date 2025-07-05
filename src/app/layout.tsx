@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ClientLayout from './ClientLayout';
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +23,6 @@ export const metadata: Metadata = {
     { rel: 'apple-touch-icon', url: '/apple-touch-icon.png' },
     { rel: 'icon', type: 'image/png', sizes: '192x192', url: '/android-chrome-192x192.png' },
     { rel: 'icon', type: 'image/png', sizes: '512x512', url: '/android-chrome-512x512.png' },
-    { rel: 'manifest', url: '/site.webmanifest' },
   ],
 };
 
@@ -41,9 +40,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-sky-50 text-cyan-900`}
       >
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        {children}
+        <Analytics />
       </body>
     </html>
   );

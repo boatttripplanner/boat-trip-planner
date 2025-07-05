@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useId, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Image from 'next/image';
-import { Recommendation, AppChatSession, CustomChecklistItem, WeatherData } from '../types';
+import { Recommendation, AppChatSession, WeatherData } from '../types';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { SailboatIcon } from './icons/SailboatIcon';
@@ -12,7 +12,6 @@ import { AccordionItem } from './AccordionItem';
 import { getAccuWeatherIconUrl } from '../services/accuweatherService';
 import { SAMBOAT_AFFILIATE_URL } from '../constants'; 
 
-import { MapPinIcon } from './icons/MapPinIcon';
 import { ClipboardListIcon } from './icons/ClipboardListIcon';
 import { MapRouteIcon } from './icons/MapRouteIcon';
 import { ChecklistIcon } from './icons/ChecklistIcon';
@@ -21,9 +20,6 @@ import { StarOutlineIcon } from './icons/StarOutlineIcon';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
 import { ThermometerIcon } from './icons/ThermometerIcon';
 import { WindIcon } from './icons/WindIcon';
-import { InputField } from './FormControls';
-import { Element as HastElement } from 'hast';
-import { ShoppingCartIcon } from './icons/ShoppingCartIcon';
 import { PhoneIcon } from './icons/PhoneIcon';
 import { WhatsAppIcon } from './icons/WhatsAppIcon';
 
@@ -45,44 +41,18 @@ interface SectionData {
 
 interface ParsedRecommendation {
   mainTitle?: string;
-  introduction?: string;
   sections: SectionData[];
 }
 
 const WEATHER_DATA_BLOCK_REGEX = /---\s*[\r\n]+\s*\*\*Datos para API de Clima \(Uso Interno - NO MOSTRAR COMO SECCIÓN PRINCIPAL EN EL ACORDEÓN\):\*\*(?:.|\r\n|\r\n)*?---/ms;
 const APP_URL = "https://www.boattrip-planner.com/";
 
-const purchasableKeywords: string[] = [
-  "crema solar", "protector solar", "gafas de sol", "sombrero", "gorra", "toalla", 
-  "ropa de baño", "traje de baño", "bañador", "bikini", "ropa de abrigo", "chaqueta", 
-  "cortavientos", "calzado de barco", "escarpines", "chanclas", "agua embotellada", 
-  "snacks", "comida para llevar", "bolsas de basura", "botiquín", "pastillas para el mareo", 
-  "cargador de móvil", "batería externa", "power bank", "equipo de snorkel", "máscara de buceo", 
-  "aletas", "tubo de snorkel", "licencia de pesca", "caña de pescar", "anzuelos", "cebo", 
-  "nevera portátil", "cooler", "altavoz bluetooth", "altavoz impermeable", "libro", "revista", 
-  "mapa náutico", "carta náutica", "chaleco salvavidas", "bengalas de emergencia", "radio vhf portátil", 
-  "ancla de capa", "cuerda náutica", "cabo", "defensas para barco", "linterna impermeable", 
-  "cuchillo multiusos", "navaja suiza", "pastillas potabilizadoras de agua", "repelente de insectos", 
-  "productos biodegradables", "bolsa estanca", "funda impermeable", "cámara acuática", "go pro",
-  "aletas de paddle surf", "remo", "hinchador", "kayak inflable", "donut acuático", "wakeboard",
-  "antiempañante para gafas", "crema aftersun"
-];
-
-const isItemPotentiallyPurchasable = (itemText: string): boolean => {
-  if (!itemText) return false;
-  const lowerItemText = itemText.toLowerCase();
-  return purchasableKeywords.some(keyword => lowerItemText.includes(keyword));
-};
-
-
 const parseMarkdownToSections = (markdownTextWithWeatherBlock: string): ParsedRecommendation => {
   let mainTitle: string | undefined;
-  let introduction = "";
   const sections: SectionData[] = [];
 
   const fullText = markdownTextWithWeatherBlock.replace(WEATHER_DATA_BLOCK_REGEX, '').trim();
   
-  let textBeforeH2 = "";
   let textToParseForSections = fullText; 
 
   const h2MatchResult = fullText.match(/^##\s+(.*)/m);
@@ -90,30 +60,10 @@ const parseMarkdownToSections = (markdownTextWithWeatherBlock: string): ParsedRe
 
   if (h2MatchResult && h2Index !== -1) {
     mainTitle = h2MatchResult[1].trim();
-    if (h2Index > 0) {
-      textBeforeH2 = fullText.substring(0, h2Index).trim();
-    }
     textToParseForSections = fullText.substring(h2Index + h2MatchResult[0].length).trim();
   }
 
   const sectionParts = textToParseForSections.split(/\n(?=###\s+)/m);
-  let introFromMainContent = "";
-
-  if (sectionParts.length > 0 && !sectionParts[0].startsWith("###")) {
-    introFromMainContent = sectionParts.shift()?.trim() || "";
-  }
-
-  if (textBeforeH2 && introFromMainContent) {
-    introduction = `${textBeforeH2}\n\n${introFromMainContent}`;
-  } else if (textBeforeH2) {
-    introduction = textBeforeH2;
-  } else {
-    introduction = introFromMainContent;
-  }
-  introduction = introduction.trim();
-  if (introduction.match(/^(\n\s*)+$/)) { 
-    introduction = "";
-  }
 
   sectionParts.forEach((part, index) => {
     if (part.trim() === "") return;
@@ -126,12 +76,10 @@ const parseMarkdownToSections = (markdownTextWithWeatherBlock: string): ParsedRe
         title,
         content
       });
-    } else if (part.trim() && !mainTitle && !introduction && sections.length === 0) {
-      introduction = part.trim();
     }
   });
 
-  return { mainTitle, introduction, sections };
+  return { mainTitle, sections };
 };
 
 
@@ -210,21 +158,6 @@ const WeatherInfoDisplay: React.FC<{
   );
 };
 
-const getNodeText = (node: React.ReactNode): string => {
-    if (node == null) return '';
-    if (typeof node === 'string' || typeof node === 'number') {
-        return String(node);
-    }
-    if (Array.isArray(node)) {
-        return node.map(getNodeText).join('');
-    }
-    if (React.isValidElement(node)) {
-        const props = node.props as { children?: React.ReactNode };
-        return getNodeText(props.children);
-    }
-    return '';
-};
-
 const RecommendationCard: React.FC<RecommendationCardProps> = ({
     recommendation,
     isLoading,
@@ -233,32 +166,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     onSendChatMessage,
     onPrintPlan
 }) => {
-  const [checkedAiItems, setCheckedAiItems] = useState<Record<string, boolean>>({});
-  const [customChecklistItems, setCustomChecklistItems] = useState<CustomChecklistItem[]>([]);
-  const [newCustomItemText, setNewCustomItemText] = useState('');
-  const componentId = useId(); 
-  const userAffiliateLink = "https://amzn.to/4kVQPxk";
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
 
-  const { mainTitle, introduction, sections } = useMemo(() => {
+  const { mainTitle } = useMemo(() => {
     if (!recommendation || !recommendation.text.trim()) {
-        return { mainTitle: undefined, introduction: undefined, sections: [] };
+        return { mainTitle: undefined };
     }
     return parseMarkdownToSections(recommendation.text);
   }, [recommendation]);
 
-  useEffect(() => {
-    setCheckedAiItems({});
-    setCustomChecklistItems([]);
-    setNewCustomItemText('');
-    // When a new recommendation is loaded, open the first section by default.
-    if (sections.length > 0) {
-        setOpenAccordionId(sections[0].id);
-    } else {
-        setOpenAccordionId(null);
-    }
-  }, [sections, error]); 
-  
   useEffect(() => {
     // When a new accordion is opened, scroll it into view.
     if (openAccordionId) {
@@ -280,27 +196,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       setOpenAccordionId(prevId => (prevId === sectionId ? null : sectionId));
   };
 
-  const handleToggleAiItem = (itemKey: string) => {
-    setCheckedAiItems(prev => ({ ...prev, [itemKey]: !prev[itemKey] }));
-  };
-
-  const handleAddCustomItem = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (newCustomItemText.trim()) {
-      setCustomChecklistItems(prev => [
-        ...prev,
-        { id: `${componentId}-custom-${Date.now()}`, text: newCustomItemText.trim(), checked: false }
-      ]);
-      setNewCustomItemText('');
-    }
-  };
-
-  const handleToggleCustomItem = (itemId: string) => {
-    setCustomChecklistItems(prev =>
-      prev.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item)
-    );
-  };
-
   const handleModifyPreferences = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -308,7 +203,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const handleShareViaWhatsApp = () => {
     if (!recommendation || !recommendation.text) return;
 
-    const { mainTitle, introduction } = parseMarkdownToSections(recommendation.text);
+    const { mainTitle } = parseMarkdownToSections(recommendation.text);
 
     let shareText = "¡Echa un vistazo a este plan de viaje en barco que creé con BoatTrip Planner! 🚤\n\n";
 
@@ -316,14 +211,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       // Remove markdown from title for clean sharing
       const cleanTitle = mainTitle.replace(/##\s*/, '').replace(/[\*_~`]/g, '');
       shareText += `Título del Plan: ${cleanTitle}\n\n`;
-    }
-
-    if (introduction) {
-      // Remove markdown from intro for clean sharing, and truncate
-      const cleanIntroduction = introduction.replace(/[\*_~`#>]/g, '');
-      const snippet = cleanIntroduction.substring(0, 150);
-      shareText += `Un pequeño adelanto: ${snippet}${cleanIntroduction.length > 150 ? "..." : ""}\n\n`;
-    } else if (!mainTitle) {
+    } else {
          shareText = "¡Echa un vistazo a los planes de viaje en barco que puedes crear con BoatTrip Planner! 🚤\n\nDescubre cómo planificar tu aventura náutica ideal.\n\n";
     }
     
@@ -349,94 +237,99 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     blockquote: (props) => <blockquote className="bg-white border-l-4 border-teal-300 rounded-r-lg p-4 my-4 shadow-sm text-slate-800 leading-relaxed" {...props} />,
   };
 
-  const interactiveChecklistComponents: Components = {
-    ...baseMarkdownComponents,
-    h5: (props) => <h5 className="text-md font-semibold text-teal-700 bg-teal-50 px-3 py-2 rounded-md mt-4 mb-2 shadow-sm" {...props} />,
-    ul: (props) => <ul className="list-none p-0 m-0 space-y-0 mb-4" {...props} />, 
-    li: ({ node, children, ...props }) => {
-      const itemKey = (node as { position?: { start?: { offset?: number } } })?.position?.start?.offset?.toString() || `ai-item-${(node as HastElement & {index?: number})?.index ?? Math.random().toString(36).substr(2, 9)}`;
-      const isChecked = !!checkedAiItems[itemKey];
-      const textContent = getNodeText(children).trim();
-      const isPurchasable = isItemPotentiallyPurchasable(textContent);
+  // NUEVO: Manejo de secciones automáticas desde la API
+  interface ApiSections {
+    weather?: WeatherData;
+    images?: string[];
+    map?: string;
+    content?: string;
+  }
+  const apiSections: ApiSections = (recommendation as unknown as { sections?: ApiSections })?.sections || {};
 
-      if (!textContent) {
-        return <li className="mb-1" {...props}>{children}</li>;
-      }
+  const aiContent = apiSections.content || recommendation?.text || '';
+  const weatherData = apiSections.weather || recommendation?.weatherData;
+  const galleryImages = apiSections.images || [];
+  const mapUrl = apiSections.map || '';
+
+  // DEBUG: Log para ver qué datos llegan
+  console.log('🔍 DEBUG - RecommendationCard data:', {
+    hasApiSections: !!apiSections,
+    aiContentLength: aiContent?.length || 0,
+    weatherData: !!weatherData,
+    galleryImagesCount: galleryImages?.length || 0,
+    mapUrl: !!mapUrl,
+    recommendationText: recommendation?.text?.length || 0
+  });
+
+  // Función para parsear el contenido AI en secciones
+  const parseAIContent = (content: string) => {
+    const sections: { id: string; title: string; content: string; icon: React.ReactNode }[] = [];
+    
+    if (!content) {
+      console.log('⚠️ No hay contenido AI para parsear');
+      return sections;
+    }
+
+    console.log('📝 Parseando contenido AI:', content.substring(0, 200) + '...');
+
+    const sectionRegex = /##\s*([^\n]+)\n([\s\S]*?)(?=##|$)/g;
+    let match;
+    let index = 0;
+
+    while ((match = sectionRegex.exec(content)) !== null) {
+      const title = match[1].trim();
+      const sectionContent = match[2].trim();
       
-      const amazonLink = userAffiliateLink;
+      console.log(`📋 Sección encontrada: "${title}" con ${sectionContent.length} caracteres`);
+      
+      if (sectionContent) {
+        const icon = getSectionIcon(title);
+        sections.push({
+          id: `ai-section-${index}`,
+          title,
+          content: sectionContent,
+          icon
+        });
+        index++;
+      }
+    }
 
-      return (
-        <li
-            className={`flex items-start py-3 border-b border-slate-200/70 last:border-b-0 hover:bg-teal-50/70 transition-colors duration-150 rounded-sm -mx-1 px-1 ${isChecked ? 'opacity-60' : ''}`}
-        >
-          <input
-            type="checkbox"
-            id={`${componentId}-${itemKey}`}
-            checked={isChecked}
-            onChange={() => handleToggleAiItem(itemKey)}
-            className="h-5 w-5 text-teal-600 border-slate-400 rounded-sm focus:ring-2 focus:ring-teal-500/50 focus:ring-offset-1 mr-3 mt-0.5 flex-shrink-0 cursor-pointer"
-            aria-labelledby={`${componentId}-${itemKey}-label`}
-          />
-          <label
-            id={`${componentId}-${itemKey}-label`}
-            htmlFor={`${componentId}-${itemKey}`}
-            className={`flex-grow cursor-pointer leading-normal ${isChecked ? 'line-through text-slate-500' : 'text-slate-800'}`}
-             onClick={(e) => {
-              if ((e.target as HTMLElement).closest('a[data-amazon-link="true"]')) {
-                return; 
-              }
-              handleToggleAiItem(itemKey);
-            }}
-          >
-            {children}
-          </label>
-          {isPurchasable && (
-            <a
-              href={amazonLink} 
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              title={`Ver "${textContent}" en Amazon.es (afiliado)`} 
-              className="ml-2 p-1 text-amber-600 hover:text-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:ring-offset-1 rounded-sm flex-shrink-0"
-              onClick={(e) => e.stopPropagation()} 
-              data-amazon-link="true" 
-              aria-label={`Ver "${textContent}" en Amazon.es (enlace de afiliado)`}
-            >
-              <ShoppingCartIcon className="w-5 h-5" />
-            </a>
-          )}
-        </li>
-      );
-    },
-     a: ({ children, href }) => {
-        return (
-          <a href={href} 
-             target="_blank" 
-             rel="noopener noreferrer" 
-             className="text-teal-600 hover:text-teal-700 underline"
-             onClick={(e) => e.stopPropagation()} 
-          >
-            {children}
-          </a>
-        );
-    },
+    console.log(`✅ Secciones parseadas: ${sections.length}`);
+    return sections;
   };
+
+  const aiSections = parseAIContent(aiContent);
 
   const getSectionIcon = (title: string): React.ReactNode => {
     const iconContainerClasses = "flex h-10 w-10 items-center justify-center rounded-full bg-teal-100";
     const iconClasses = "w-6 h-6 text-teal-700";
 
-    // Rely on keyword matching for a consistent, designed icon set, ignoring text emojis.
-    if (title.toLowerCase().includes("datos clave") || title.toLowerCase().includes("zona de navegación")) return <div className={iconContainerClasses}><MapPinIcon className={iconClasses} aria-hidden="true" /></div>;
-    if (title.toLowerCase().includes("resumen")) return <div className={iconContainerClasses}><ClipboardListIcon className={iconClasses} aria-hidden="true" /></div>;
-    if (title.toLowerCase().includes("itinerario")) return <div className={iconContainerClasses}><MapRouteIcon className={iconClasses} aria-hidden="true" /></div>;
-    if (title.toLowerCase().includes("checklist")) return <div className={iconContainerClasses}><ChecklistIcon className={iconClasses} aria-hidden="true" /></div>;
-    if (title.toLowerCase().includes("consejos") || title.toLowerCase().includes("advertencias")) return <div className={iconContainerClasses}><InfoOutlineIcon className={iconClasses} aria-hidden="true" /></div>;
-    if (title.toLowerCase().includes("actividades y lugares extra")) return <div className={iconContainerClasses}><StarOutlineIcon className={iconClasses} aria-hidden="true" /></div>;
-    if (title.toLowerCase().includes("información sobre empresas") || title.toLowerCase().includes("contacto")) return <div className={iconContainerClasses}><PhoneIcon className={iconClasses} aria-hidden="true" /></div>;
+    if (title.toLowerCase().includes("datos clave") || title.toLowerCase().includes("navegación")) {
+      return <div className={iconContainerClasses}><MapRouteIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
+    if (title.toLowerCase().includes("resumen")) {
+      return <div className={iconContainerClasses}><ClipboardListIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
+    if (title.toLowerCase().includes("itinerario")) {
+      return <div className={iconContainerClasses}><MapRouteIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
+    if (title.toLowerCase().includes("checklist")) {
+      return <div className={iconContainerClasses}><ChecklistIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
+    if (title.toLowerCase().includes("consejos") || title.toLowerCase().includes("advertencias")) {
+      return <div className={iconContainerClasses}><InfoOutlineIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
+    if (title.toLowerCase().includes("actividades") || title.toLowerCase().includes("lugares")) {
+      return <div className={iconContainerClasses}><StarOutlineIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
+    if (title.toLowerCase().includes("contacto") || title.toLowerCase().includes("información")) {
+      return <div className={iconContainerClasses}><PhoneIcon className={iconClasses} aria-hidden="true" /></div>;
+    }
     
     return <div className={iconContainerClasses}><DocumentTextIcon className={iconClasses} aria-hidden="true" /></div>;
   };
 
+  const remarkPlugins = [remarkGfm];
 
   if (isLoading) {
     return (
@@ -475,7 +368,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     );
   }
 
-  if (!recommendation || !recommendation.text.trim()) {
+  if (!recommendation || !recommendation.text?.trim()) {
     return (
       <div className="card bg-white shadow-lg border border-slate-200 rounded-2xl max-w-2xl mx-auto p-8 md:p-12 flex flex-col items-center justify-center min-h-[300px] text-center w-full">
         <SailboatIcon className="w-16 h-16 text-primary mb-4" />
@@ -485,115 +378,136 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     );
   }
 
-  const remarkPlugins = [remarkGfm];
-
   return (
     <div className="card bg-white shadow-lg border border-slate-200 rounded-2xl max-w-2xl mx-auto p-8 md:p-12">
       <div className="flex items-center gap-4 mb-6">
         <SailboatIcon className="w-10 h-10 text-primary" />
         <h2 className="text-2xl font-bold text-primary">{mainTitle || 'Recomendación'}</h2>
       </div>
-      {introduction && (
-        <div className="recommendation-intro text-slate-700 mb-6 leading-relaxed bg-white/70 backdrop-blur-sm p-4 rounded-md shadow-sm border border-slate-200">
-           <ReactMarkdown remarkPlugins={remarkPlugins} components={baseMarkdownComponents}>
-            {introduction}
-          </ReactMarkdown>
-        </div>
+
+      {/* Sección Clima */}
+      {weatherData && (
+        <AccordionItem
+          id="weather-section"
+          title="🌦️ Pronóstico del Clima"
+          icon={<ThermometerIcon className="w-6 h-6 text-teal-700" />}
+          isOpen={openAccordionId === 'weather-section'}
+          onToggle={() => handleToggleAccordion('weather-section')}
+        >
+          <WeatherInfoDisplay
+            weatherData={weatherData}
+            weatherError={recommendation?.weatherError}
+            isFetchingWeather={recommendation?.isFetchingWeather}
+            isAwaitingLocationData={recommendation?.isAwaitingLocationData}
+          />
+        </AccordionItem>
       )}
 
-      {sections.length > 0 ? (
-        <div className="space-y-3">
-          {sections.map((section) => {
-            const isChecklistSection = section.title.toLowerCase().includes("checklist") || section.title.includes("✅");
-            const isNavDataSection = section.title.toLowerCase().includes("datos clave") || section.title.includes("🗺️");
-            
-            // Regex to remove leading emojis for a cleaner title display. The 'u' flag is for unicode.
-            const cleanTitle = section.title.replace(/^(\s*[\p{Emoji_Presentation}\p{Emoji}]\s*)+/u, '').trim();
-            
-            return (
-              <AccordionItem
-                key={section.id}
-                id={section.id}
-                title={cleanTitle}
-                icon={getSectionIcon(section.title)}
-                isOpen={openAccordionId === section.id}
-                onToggle={() => handleToggleAccordion(section.id)}
-              >
-                {isNavDataSection && (
-                  <WeatherInfoDisplay
-                    weatherData={recommendation?.weatherData}
-                    weatherError={recommendation?.weatherError}
-                    isFetchingWeather={recommendation?.isFetchingWeather}
-                    isAwaitingLocationData={recommendation?.isAwaitingLocationData}
-                  />
-                )}
-                <ReactMarkdown
-                  remarkPlugins={remarkPlugins}
-                  components={isChecklistSection ? interactiveChecklistComponents : baseMarkdownComponents}
-                >
-                  {section.content}
-                </ReactMarkdown>
-                {isChecklistSection && (
-                  <div className="mt-6 pt-4 border-t border-slate-300">
-                    <h4 className="text-lg font-semibold text-teal-700 mb-3">✏️ Añadir artículos propios a la checklist:</h4>
-                    {customChecklistItems.length > 0 && (
-                        <ul className="list-none p-0 m-0 space-y-0 mb-4">
-                        {customChecklistItems.map(item => (
-                          <li key={item.id} className={`flex items-start py-3 border-b border-slate-200/70 last:border-b-0 hover:bg-teal-50/70 transition-colors duration-150 rounded-sm -mx-1 px-1 ${item.checked ? 'opacity-60' : ''}`}>
-                            <input
-                              type="checkbox"
-                              id={item.id}
-                              checked={item.checked}
-                              onChange={() => handleToggleCustomItem(item.id)}
-                              className="h-5 w-5 text-teal-600 border-slate-400 rounded-sm focus:ring-2 focus:ring-teal-500/50 focus:ring-offset-1 mr-3 mt-0.5 flex-shrink-0 cursor-pointer"
-                              aria-labelledby={`${item.id}-label`}
-                            />
-                            <label
-                                id={`${item.id}-label`}
-                                htmlFor={item.id}
-                                className={`flex-grow cursor-pointer leading-normal ${item.checked ? 'line-through text-slate-500' : 'text-slate-800'}`}
-                            >
-                              {item.text}
-                            </label>
-                          </li>
-                        ))}
-                        </ul>
-                    )}
-                    <form onSubmit={handleAddCustomItem} className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
-                      <InputField
-                        label=""
-                        aria-label="Nuevo artículo para la checklist"
-                        id={`${componentId}-new-custom-item`}
-                        type="text"
-                        value={newCustomItemText}
-                        onChange={(e) => setNewCustomItemText(e.target.value)}
-                        placeholder="Escribe tu artículo aquí..."
-                        className="flex-grow !mt-0 bg-white text-slate-800 placeholder:text-slate-500"
-                      />
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        size="md"
-                        className="px-4 py-2.5 w-full sm:w-auto" 
-                        disabled={!newCustomItemText.trim()}
-                      >
-                        Añadir
-                      </Button>
-                    </form>
-                  </div>
-                )}
-              </AccordionItem>
-            );
-          })}
-        </div>
-      ) : (
-         !mainTitle && !introduction && recommendation.text && (
-            <div className="bg-white p-4 rounded-lg shadow-md text-slate-700">
-                 <ReactMarkdown remarkPlugins={remarkPlugins} components={baseMarkdownComponents}>
-                    {recommendation.text}
-                 </ReactMarkdown>
+      {/* Sección Galería de Imágenes */}
+      {galleryImages && galleryImages.length > 0 && (
+        <AccordionItem
+          id="gallery-section"
+          title="🖼️ Galería de Imágenes"
+          icon={<DocumentTextIcon className="w-6 h-6 text-teal-700" />}
+          isOpen={openAccordionId === 'gallery-section'}
+          onToggle={() => handleToggleAccordion('gallery-section')}
+        >
+          <div className="grid grid-cols-2 gap-2">
+            {galleryImages.map((img: string, idx: number) => (
+              <div key={img + idx} className="rounded overflow-hidden border border-slate-200">
+                <Image src={img} alt={`Foto destino ${idx + 1}`} width={300} height={200} className="object-cover w-full h-32" />
+              </div>
+            ))}
+          </div>
+        </AccordionItem>
+      )}
+
+      {/* Sección Mapa */}
+      {mapUrl && (
+        <AccordionItem
+          id="map-section"
+          title="🗺️ Mapa de Ruta"
+          icon={<MapRouteIcon className="w-6 h-6 text-teal-700" />}
+          isOpen={openAccordionId === 'map-section'}
+          onToggle={() => handleToggleAccordion('map-section')}
+        >
+          <div className="w-full flex justify-center">
+            <Image src={mapUrl} alt="Mapa de ruta" width={600} height={300} className="rounded border border-slate-200" />
+          </div>
+        </AccordionItem>
+      )}
+
+      {/* Sección Contenido IA (Markdown estructurado) */}
+      {aiSections.map((section) => (
+        <AccordionItem
+          key={section.id}
+          id={section.id}
+          title={section.title}
+          icon={section.icon}
+          isOpen={openAccordionId === section.id}
+          onToggle={() => handleToggleAccordion(section.id)}
+        >
+          <ReactMarkdown remarkPlugins={remarkPlugins} components={baseMarkdownComponents}>
+            {section.content}
+          </ReactMarkdown>
+        </AccordionItem>
+      ))}
+
+      {/* Fallback: Si no hay secciones AI, mostrar contenido básico */}
+      {aiSections.length === 0 && aiContent && (
+        <AccordionItem
+          id="basic-content-section"
+          title="📝 Recomendación Generada"
+          icon={<DocumentTextIcon className="w-6 h-6 text-teal-700" />}
+          isOpen={openAccordionId === 'basic-content-section'}
+          onToggle={() => handleToggleAccordion('basic-content-section')}
+        >
+          <ReactMarkdown remarkPlugins={remarkPlugins} components={baseMarkdownComponents}>
+            {aiContent}
+          </ReactMarkdown>
+        </AccordionItem>
+      )}
+
+      {/* Fallback: Si no hay contenido AI, mostrar mensaje informativo */}
+      {aiSections.length === 0 && !aiContent && (
+        <AccordionItem
+          id="info-section"
+          title="ℹ️ Información del Viaje"
+          icon={<InfoOutlineIcon className="w-6 h-6 text-teal-700" />}
+          isOpen={openAccordionId === 'info-section'}
+          onToggle={() => handleToggleAccordion('info-section')}
+        >
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-800 mb-2">🚤 Plan de Viaje a tu destino</h4>
+              <p className="text-blue-700">
+                Hemos generado una recomendación personalizada para tu viaje en barco. 
+                Las secciones detalladas se están cargando automáticamente con información 
+                del clima, imágenes del destino y contenido generado por IA.
+              </p>
             </div>
-         )
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <h4 className="font-semibold text-amber-800 mb-2">💡 Consejos Generales</h4>
+              <ul className="text-amber-700 space-y-2">
+                <li>• Verifica el pronóstico del tiempo antes de zarpar</li>
+                <li>• Lleva documentación del barco y licencias necesarias</li>
+                <li>• Equípate con chalecos salvavidas y equipo de seguridad</li>
+                <li>• Planifica rutas alternativas por si cambia el clima</li>
+                <li>• Ten números de emergencia a mano</li>
+              </ul>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h4 className="font-semibold text-green-800 mb-2">🎯 Próximos Pasos</h4>
+              <p className="text-green-700">
+                Para obtener recomendaciones más detalladas, asegúrate de que todas las 
+                APIs estén configuradas correctamente. Puedes modificar tus preferencias 
+                y generar una nueva recomendación.
+              </p>
+            </div>
+          </div>
+        </AccordionItem>
       )}
 
       <div className="mt-8 pt-6 border-t-2 border-slate-300/70 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
