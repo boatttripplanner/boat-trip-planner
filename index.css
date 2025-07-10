@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .app-font {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer base {
+  body {
+    min-height: 100vh;
+    color: rgb(30 41 59); /* slate-800 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 40%, #80deea 100%);
+    position: relative;
+  }
+}
+
+@layer components {
+  .main-container {
+    max-width: 56rem; /* max-w-4xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* px-4 */
+    padding-right: 1rem;
+    padding-top: 2.5rem; /* py-10 */
+    padding-bottom: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+    border-radius: 1.5rem; /* rounded-3xl */
+    background-color: rgba(255, 255, 255, 0.95); /* bg-white/95 */
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 8px 32px 0 rgba(0,188,212,0.12), 0 1.5px 6px 0 rgba(0,0,0,0.04);
+  }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; top: 0; height: 220px;
+  z-index: 0;
+  background: url('data:image/svg+xml;utf8,<svg width="100%25" height="220" viewBox="0 0 1440 220" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 120C120 180 360 220 720 220C1080 220 1320 180 1440 120V0H0V120Z" fill="%2300bcd4" fill-opacity="0.18"/></svg>') no-repeat top center;
+  background-size: cover;
+  pointer-events: none;
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 0 0 rgba(0,188,212,0.4); }
+  70% { box-shadow: 0 0 16px 8px rgba(0,188,212,0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(0,188,212,0.4); }
+}
+
+.animate-glow { animation: glow 2s infinite; } 
+
+/* Estilos específicos para dispositivos móviles */
+@media (max-width: 768px) {
+  .main-container {
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+  
+  body {
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Mejorar la experiencia táctil */
+  button, .button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimizar inputs para móviles */
+  input, select, textarea {
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+  
+  /* Mejorar scroll en móviles */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Estilos para PWA en modo standalone */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  .main-container {
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+}
+
+/* Estilos para dispositivos con notch (iPhone X y similares) */
+@supports (padding: max(0px)) {
+  body {
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Optimizaciones para pantallas pequeñas */
+@media (max-width: 480px) {
+  .main-container {
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: 0;
+  }
+  
+  /* Ajustar tamaños de fuente para mejor legibilidad */
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.125rem; }
+  
+  /* Mejorar espaciado en móviles */
+  .flex-col > * + * {
+    margin-top: 1rem;
+  }
+}
+
+/* Estilos para modo oscuro en móviles */
+@media (prefers-color-scheme: dark) {
+  .main-container {
+    background-color: rgba(15, 23, 42, 0.95); /* slate-900 con transparencia */
+  }
+  
+  body {
+    color: rgb(241, 245, 249); /* slate-100 */
+  }
+} 
