@@ -2,14 +2,37 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { UserPreferences, ExperienceLevel, experienceLevelOptions, DesiredExperienceType, desiredExperienceTypeOptions, BoatTransferDetails, BoatingLicenseType, boatingLicenseTypeOptions, BudgetLevel, PlanningMode } from '../types';
 import { GEMINI_MODEL_NAME, budgetLevelOptions, SYSTEM_NAUTICAL_PLANNER_PROMPT, planningModeOptions } from '../constants';
+import { getConfig, isApiAvailable } from '../config.local';
 
-const geminiApiKey = (typeof process !== 'undefined' && process.env && process.env.API_KEY) || "MISSING_API_KEY";
+// Función para inicializar la API de Gemini de forma segura
+const initializeGeminiAPI = () => {
+  const config = getConfig();
+  
+  if (!isApiAvailable()) {
+    throw new Error('API de Gemini no disponible: Clave API no válida o faltante');
+  }
+  
+  return new GoogleGenAI({ apiKey: config.GEMINI_API_KEY });
+};
 
-if (geminiApiKey === "MISSING_API_KEY") {
-  console.error("La variable de entorno API_KEY no está configurada para Gemini. Las llamadas a la API de Gemini fallarán.");
-}
-
-const ai = new GoogleGenAI({ apiKey: geminiApiKey }); 
+// Función para manejar errores de la API de forma segura
+const handleApiError = (error: any, context: string): string => {
+  console.error(`Error en ${context}:`, error);
+  
+  if (error.message?.includes('API key')) {
+    return 'Error de configuración: Clave API no válida. Por favor, contacta al administrador.';
+  }
+  
+  if (error.message?.includes('quota')) {
+    return 'Límite de uso de la API alcanzado. Por favor, intenta más tarde.';
+  }
+  
+  if (error.message?.includes('network') || error.message?.includes('fetch')) {
+    return 'Error de conexión. Por favor, verifica tu conexión a internet e intenta de nuevo.';
+  }
+  
+  return 'Error interno del servidor. Por favor, intenta de nuevo más tarde.';
+};
 
 export const constructPrompt = (preferences: UserPreferences): string => {
   const desiredExperienceTypeOption = desiredExperienceTypeOptions.find(opt => opt.value === preferences.desiredExperienceType);
@@ -213,10 +236,7 @@ Asegúrate de incluir el bloque "Datos para API de Clima (Uso Interno - NO MOSTR
 };
 
 export async function* generateBoatTripRecommendationStream(preferences: UserPreferences): AsyncGenerator<string, void, undefined> {
-  if (geminiApiKey === "MISSING_API_KEY") { 
-    console.error("Error: La API_KEY de Google Gemini no está configurada en el entorno.");
-    throw new Error("La API_KEY no está configurada. Por favor, asegúrate de que la variable de entorno API_KEY esté definida correctamente. No se puede conectar a la API de Gemini.");
-  }
+  const ai = initializeGeminiAPI();
   
   const prompt = constructPrompt(preferences);
   
@@ -247,25 +267,7 @@ export async function* generateBoatTripRecommendationStream(preferences: UserPre
     }
 
   } catch (error) {
-    console.error("Error llamando a la API de Gemini o durante el streaming:", error);
-    if (error instanceof Error) {
-        if (error.message.includes("API key not valid") || 
-            error.message.includes("API_KEY_INVALID") || 
-            error.message.toLowerCase().includes("permission denied") || 
-            error.message.toLowerCase().includes("api key is missing") ||
-            error.message.toLowerCase().includes("authentication failed")) { 
-             throw new Error("Error de autenticación con la API de Gemini: Clave API inválida, con permisos insuficientes, o no proporcionada. Por favor, verifica la configuración de tu clave API (API_KEY) en el entorno.");
-        }
-        const geminiError = error as any; 
-        if (geminiError?.message?.toLowerCase().includes("blocked") || 
-            geminiError?.response?.promptFeedback?.blockReason || 
-            geminiError?.promptFeedback?.blockReason) {
-             const blockReason = geminiError?.response?.promptFeedback?.blockReason || geminiError?.promptFeedback?.blockReason || "no especificada";
-             console.warn("Respuesta bloqueada por la API de Gemini. Razón:", blockReason);
-             throw new Error(`Tu solicitud no pudo ser procesada porque el contenido fue bloqueado por razones de seguridad o política de la IA (Razón: ${blockReason}). Intenta reformular tus preferencias.`);
-        }
-         throw new Error(`La solicitud a la API de Gemini falló con el mensaje: ${error.message}. Por favor, inténtalo de nuevo más tarde.`);
-    }
-    throw new Error("Ocurrió un error desconocido al comunicarse con la API de Gemini. Por favor, inténtalo de nuevo más tarde.");
+    const errorMessage = handleApiError(error, "generateBoatTripRecommendationStream");
+    throw new Error(errorMessage);
   }
 }
