@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin Conexión - BoatTrip Planner</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 40%, #80deea 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .offline-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 188, 212, 0.12);
+            max-width: 400px;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .retry-btn {
+            background: #00bcd4;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .retry-btn:hover {
+            background: #0097a7;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="icon">⛵</div>
+        <h1>Sin Conexión</h1>
+        <p>No tienes conexión a internet en este momento. BoatTrip Planner necesita conexión para generar recomendaciones personalizadas.</p>
+        <p>Verifica tu conexión e intenta de nuevo.</p>
+        <button class="retry-btn" onclick="window.location.reload()">Reintentar</button>
+    </div>
+</body>
+</html> 
