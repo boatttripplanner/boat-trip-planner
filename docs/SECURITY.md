@@ -9,14 +9,17 @@ Este documento describe cómo configurar las APIs y variables de entorno de form
 **Propósito**: Generar recomendaciones de viajes en barco con IA.
 
 **Configuración**:
+
 1. Ve a [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Crea una nueva API key
 3. Configura en `.env.local`:
+
    ```env
    VITE_GEMINI_API_KEY=AIzaSyC...
    ```
 
 **Seguridad**:
+
 - ✅ Nunca commits la clave API al repositorio
 - ✅ Usa variables de entorno en producción
 - ✅ Configura límites de uso en Google AI Studio
@@ -27,9 +30,11 @@ Este documento describe cómo configurar las APIs y variables de entorno de form
 **Propósito**: Información meteorológica para destinos náuticos.
 
 **Configuración**:
+
 1. Regístrate en [AccuWeather Developer](https://developer.accuweather.com/)
 2. Obtén tu API key
 3. Configura en `.env.local`:
+
    ```env
    VITE_ACCUWEATHER_API_KEY=your_key_here
    ```
@@ -47,11 +52,13 @@ Este script te guiará paso a paso para configurar todas las variables.
 ### Método 2: Manual
 
 1. Copia el archivo de ejemplo:
+
    ```bash
    cp env.example .env.local
    ```
 
 2. Edita `.env.local` con tus claves API:
+
    ```env
    VITE_GEMINI_API_KEY=tu_clave_gemini_aqui
    VITE_ACCUWEATHER_API_KEY=tu_clave_accuweather_aqui
@@ -68,6 +75,7 @@ Para deployment automático, configura estos secrets en tu repositorio:
 
 1. Ve a `Settings` > `Secrets and variables` > `Actions`
 2. Agrega los siguientes secrets:
+
    - `VITE_GEMINI_API_KEY`
    - `VITE_ACCUWEATHER_API_KEY`
    - `VITE_GA_MEASUREMENT_ID`
@@ -76,6 +84,7 @@ Para deployment automático, configura estos secrets en tu repositorio:
 ### Validación Automática
 
 El workflow de GitHub Actions validará automáticamente:
+
 - ✅ Presencia de claves API críticas
 - ✅ Formato correcto de las claves
 - ✅ Configuración de variables opcionales
@@ -85,6 +94,7 @@ El workflow de GitHub Actions validará automáticamente:
 ### Validación de Claves API
 
 El sistema valida automáticamente:
+
 - **Gemini API**: Debe empezar con `AIza` y tener al menos 30 caracteres
 - **AccuWeather API**: Debe tener al menos 20 caracteres
 - **Google Analytics**: Formato `G-XXXXXXXXXX`
@@ -118,6 +128,7 @@ npm run dev
 ### Verificar Configuración de Producción
 
 El workflow de GitHub Actions verificará:
+
 - ✅ Build exitoso
 - ✅ Variables de entorno válidas
 - ✅ Deployment a GitHub Pages
@@ -129,6 +140,7 @@ El workflow de GitHub Actions verificará:
 **Causa**: Clave API no configurada o inválida.
 
 **Solución**:
+
 1. Verifica que `VITE_GEMINI_API_KEY` esté en `.env.local`
 2. Asegúrate de que la clave sea válida
 3. Verifica que no haya espacios extra
@@ -138,6 +150,7 @@ El workflow de GitHub Actions verificará:
 **Causa**: Se excedió el límite de uso de la API.
 
 **Solución**:
+
 1. Verifica el uso en Google AI Studio
 2. Considera aumentar el límite
 3. Implementa rate limiting si es necesario
@@ -147,6 +160,7 @@ El workflow de GitHub Actions verificará:
 **Causa**: Problemas de red o API no disponible.
 
 **Solución**:
+
 1. Verifica tu conexión a internet
 2. Intenta más tarde
 3. Verifica el estado de las APIs

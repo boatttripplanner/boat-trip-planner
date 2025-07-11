@@ -113,8 +113,9 @@ const Step1Experience: React.FC<WizardStepProps> = ({ data, updateData }) => {
                         if (newType !== DesiredExperienceType.MULTI_DAY) {
                             updates.isSamePortForMultiDay = true;
                             updates.arrivalPortForMultiDay = '';
-                            updates.endDate = ''; 
-                            updates.multiDayTripNotes = ''; 
+                            updates.endDate = '';
+                            updates.multiDayTripNotes = '';
+                            updates.numTripDays = undefined; // Limpiar número de días si no es multi_day
                         }
                         updateData(updates);
                     }}

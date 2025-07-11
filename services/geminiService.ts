@@ -19,16 +19,20 @@ const initializeGeminiAPI = () => {
 const handleApiError = (error: any, context: string): string => {
   console.error(`Error en ${context}:`, error);
   
-  if (error.message?.includes('API key')) {
-    return 'Error de configuración: Clave API no válida. Por favor, contacta al administrador.';
+  if (error.message?.includes('API key') || error.message?.includes('authentication')) {
+    return 'Error de configuración: Clave API no válida o faltante. Por favor, verifica tu configuración.';
   }
   
-  if (error.message?.includes('quota')) {
+  if (error.message?.includes('quota') || error.message?.includes('rate limit')) {
     return 'Límite de uso de la API alcanzado. Por favor, intenta más tarde.';
   }
   
-  if (error.message?.includes('network') || error.message?.includes('fetch')) {
+  if (error.message?.includes('network') || error.message?.includes('fetch') || error.message?.includes('connection')) {
     return 'Error de conexión. Por favor, verifica tu conexión a internet e intenta de nuevo.';
+  }
+  
+  if (error.message?.includes('timeout')) {
+    return 'La solicitud tardó demasiado en completarse. Por favor, intenta de nuevo.';
   }
   
   return 'Error interno del servidor. Por favor, intenta de nuevo más tarde.';
@@ -162,10 +166,11 @@ export const constructPrompt = (preferences: UserPreferences): string => {
 
   // Skipper logic based on planningMode and experience
   if (preferences.planningMode === PlanningMode.OWN_BOAT) {
+    prompt += `    *   **Instrucción CRÍTICA para la IA:** El usuario ha indicado que tiene su propio barco. BAJO NINGUNA CIRCUNSTANCIA sugieras la contratación de un patrón o skipper, ni siquiera como opción. Adapta toda la recomendación a su experiencia y titulación, asumiendo que navegará con su propio barco y según su nivel. Si la experiencia es baja, solo sugiere precauciones o formación, pero nunca la contratación de patrón.`;
     if (preferences.experience === ExperienceLevel.BEGINNER_NEEDS_SKIPPER || preferences.experience === ExperienceLevel.BASIC_KNOWLEDGE_PREFERS_SKIPPER) {
-        prompt += `    *   **Instrucción CRÍTICA para la IA (Barco Propio, Poca Experiencia):** Usuario tiene su propio barco pero su nivel de experiencia es ${experienceDisplay}. DEBES RECOMENDAR ENFÁTICAMENTE que cuente con un patrón profesional o una persona cualificada a bordo para garantizar la seguridad y el disfrute. Explica los beneficios claramente.\n`;
+        prompt += `\n    *   **Nota adicional:** Aunque el usuario tiene poca experiencia, NO sugieras patrón. Solo recomienda precauciones, rutas sencillas o formación, pero nunca la contratación de patrón.`;
     } else { // Experienced or Expert with own boat
-        prompt += `    *   **Instrucción para la IA (Barco Propio, Experimentado):** Usuario es ${experienceDisplay} y utiliza su propio barco. ASUME que el usuario operará la embarcación o ha organizado un patrón. NO sugieras un patrón a menos que el plan sea excepcionalmente complejo y lo justifiques. Tu recomendación debe ser para navegación SIN patrón como base.\n`;
+        prompt += `\n    *   **Nota adicional:** El usuario es experimentado y usará su propio barco. Adapta la recomendación a su titulación y experiencia.`;
     }
   } else { // RENTAL mode
       if (preferences.experience === ExperienceLevel.BEGINNER_NEEDS_SKIPPER) {
@@ -268,6 +273,39 @@ export async function* generateBoatTripRecommendationStream(preferences: UserPre
 
   } catch (error) {
     const errorMessage = handleApiError(error, "generateBoatTripRecommendationStream");
+    throw new Error(errorMessage);
+  }
+}
+
+/**
+ * Genera una recomendación de viaje en barco (no stream, para tests y uso simple)
+ * @param preferences UserPreferences
+ * @returns Promise<{ recommendation: string, itinerary?: string, weather?: string }>
+ */
+export async function generateRecommendation(preferences: UserPreferences): Promise<{ recommendation: string, itinerary?: string, weather?: string }> {
+  const ai = initializeGeminiAPI();
+  const prompt = constructPrompt(preferences);
+  try {
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL_NAME,
+      contents: prompt,
+      config: {
+        temperature: 0.6,
+        topK: 40,
+        topP: 0.95,
+      }
+    });
+    // Extraer el texto de la respuesta de Gemini
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = { recommendation: text };
+    }
+    return parsed;
+  } catch (error) {
+    const errorMessage = handleApiError(error, "generateRecommendation");
     throw new Error(errorMessage);
   }
 }

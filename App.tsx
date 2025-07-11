@@ -16,7 +16,6 @@ import NotFoundPage from './components/NotFoundPage';
 import BlogIndexPage from './src/components/BlogIndexPage';
 import BlogPostPage from './src/components/BlogPostPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
-import AndroidCompatibilityAlert from './components/AndroidCompatibilityAlert';
 import LoadingOverlay from './components/LoadingOverlay';
 import { generateBoatTripRecommendationStream, constructPrompt } from './services/geminiService';
 import { getLocationKey as getAccuWeatherLocationKey, getWeatherForecast as getAccuWeatherForecast } from './services/accuweatherService';
@@ -87,10 +86,51 @@ const getViewAndSlugFromLocation = (): { view: AppView; slug: string | null } =>
   }
 };
 
+const PASSWORD = 'demo2024';
+
+const PasswordGate: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
+  const [input, setInput] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input === PASSWORD) {
+      onUnlock();
+    } else {
+      setError('Contraseña incorrecta.');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-6 min-w-[320px] max-w-xs">
+        <h2 className="text-2xl font-extrabold text-teal-700 mb-2 text-center">Acceso Protegido</h2>
+        <p className="text-slate-600 text-center">Introduce la contraseña para acceder a la demo.</p>
+        <input
+          type="password"
+          className="w-full px-4 py-3 rounded-lg border-2 border-teal-300 focus:border-teal-500 focus:outline-none text-lg text-slate-800 bg-slate-50"
+          placeholder="Contraseña"
+          value={input}
+          onChange={e => { setInput(e.target.value); setError(''); }}
+          autoFocus
+        />
+        {error && <div className="text-red-600 text-sm font-semibold">{error}</div>}
+        <button type="submit" className="w-full py-3 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-bold text-lg shadow hover:from-teal-700 hover:to-cyan-600 transition-all">Entrar</button>
+      </form>
+    </div>
+  );
+};
 
 const App: React.FC = () => {
+  const [unlocked, setUnlocked] = useState(
+    typeof window !== 'undefined' && window.sessionStorage.getItem('unlocked') === '1'
+  );
+
+  if (!unlocked) {
+    return <PasswordGate onUnlock={() => { setUnlocked(true); if (typeof window !== 'undefined') window.sessionStorage.setItem('unlocked', '1'); }} />;
+  }
+
   const config = getConfig();
-  const [currentPreferences, setCurrentPreferences] = useState<UserPreferences | null>(null);
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(false);
@@ -482,7 +522,6 @@ const App: React.FC = () => {
 
 
   const handleGetRecommendations = useCallback(async (preferences: UserPreferences) => {
-    setCurrentPreferences(preferences);
     setIsGenerating(true);
     setIsLoadingRecommendation(true);
     setError(null);
@@ -675,10 +714,10 @@ const App: React.FC = () => {
         return (
           <>
             <div className="w-full max-w-2xl no-print mb-6">
-              <AndroidCompatibilityAlert />
+              
             </div>
             <div
-              className="w-full max-w-2xl no-print"
+              className="w-full max-w-2xl no-print mt-20"
               style={{ position: 'relative', zIndex: 20 }}
             >
               <UserInputForm

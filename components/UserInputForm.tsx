@@ -179,7 +179,9 @@ const UserInputForm: React.FC<UserInputFormProps> = ({ onSubmit, isLoading, cook
 
   return (
     <form onSubmit={handleSubmit} className="bg-white/90 p-6 sm:p-8 rounded-2xl shadow-2xl space-y-8 w-full border border-slate-200" aria-labelledby="form-title">
-      <h2 id="form-title" className="text-xl font-bold mb-4">Planifica tu viaje en barco</h2>
+      <h2 id="form-title" className="text-3xl sm:text-4xl font-extrabold text-center mb-6 bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent drop-shadow-lg">
+        Planifica tu viaje en barco
+      </h2>
       <div aria-live="polite" className="min-h-[1.5em] text-red-600 font-semibold mb-2">{formError}</div>
       <ProgressStepper steps={stepDetails.map(s => s.name)} currentStep={currentStep} />
       <div className="mt-8 transition-all duration-300">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useId, useMemo } from 'react';
+import React, { useState, useId, useMemo } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Recommendation, AppChatSession, CustomChecklistItem } from '../types';
@@ -165,10 +165,40 @@ const WeatherInfoDisplay: React.FC<{
     iconUrl = `https://developer.accuweather.com/sites/default/files/${weatherData.accuWeatherDayIcon}-s.png`;
   }
 
+  // Fallback para el icono del tiempo según la frase
+  const getWeatherEmoji = (phrase: string = "") => {
+    const p = phrase.toLowerCase();
+    if (p.includes("soleado")) return "☀️";
+    if (p.includes("nublado") || p.includes("nuboso")) return "☁️";
+    if (p.includes("lluvia") || p.includes("chubascos") || p.includes("lluvioso")) return "🌧️";
+    if (p.includes("tormenta") || p.includes("eléctrica") || p.includes("trueno")) return "⛈️";
+    if (p.includes("nieve") || p.includes("nev")) return "❄️";
+    if (p.includes("niebla") || p.includes("bruma")) return "🌫️";
+    if (p.includes("granizo")) return "🌨️";
+    if (p.includes("viento") || p.includes("ventoso")) return "💨";
+    if (p.includes("calor") || p.includes("caluroso")) return "🌡️";
+    if (p.includes("frío") || p.includes("helada")) return "🥶";
+    return "🌤️";
+  };
+
+  const [imgError, setImgError] = React.useState(false);
+  const weatherFallback = (
+    <span className="text-2xl mr-3 inline-block" role="img" aria-label="Clima">
+      {getWeatherEmoji(weatherData.dayIconPhrase)}
+    </span>
+  );
+
   return (
     <div className="mt-2 mb-6 p-6 bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 rounded-2xl border border-blue-200/50 shadow-sm">
       <h5 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4 flex items-center">
-        {iconUrl && <img src={iconUrl} alt={weatherData.dayIconPhrase} className="w-10 h-10 mr-3 inline-block" />}
+        {iconUrl && !imgError ? (
+          <img
+            src={iconUrl}
+            alt={weatherData.dayIconPhrase}
+            className="w-10 h-10 mr-3 inline-block"
+            onError={() => setImgError(true)}
+          />
+        ) : weatherFallback}
         Pronóstico para {forecastDate} (Fuente: {sourceText})
       </h5>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-700">
@@ -225,8 +255,28 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     return parseMarkdownToSections(recommendation.text);
   }, [recommendation?.text]);
 
+  // Abrir solo la primera sección por defecto
+  React.useEffect(() => {
+    if (sections.length > 0) {
+      setOpenAccordionId(sections[0].id);
+    }
+  }, [sections.length, sections[0]?.id]);
+
   const handleToggleAccordion = (sectionId: string) => {
-    setOpenAccordionId(openAccordionId === sectionId ? null : sectionId);
+    setOpenAccordionId(prevId => {
+      if (prevId === sectionId) return null;
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const isFullyVisible = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
+          if (!isFullyVisible) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }, 350); // Ajuste para coincidir con la animación del acordeón
+      return sectionId;
+    });
   };
 
   const handleToggleAiItem = (itemKey: string) => {
@@ -405,11 +455,11 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
   if (!recommendation || !recommendation.text.trim()) {
     return (
-      <div className="bg-gradient-to-br from-white via-blue-50/30 to-cyan-50/30 p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center min-h-[300px] text-center w-full border border-blue-100/50">
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4">
+      <div className="bg-gradient-to-br from-yellow-100 via-orange-100 to-yellow-50 p-8 rounded-3xl shadow-2xl flex flex-col items-center justify-center min-h-[300px] text-center w-full border border-yellow-200/60 mb-10 mt-20">
+        <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-yellow-500 bg-clip-text text-transparent mb-4">
           ¿Listo para la Aventura?
         </h3>
-        <p className="text-lg text-slate-600 font-medium">¡Completa el formulario para obtener recomendaciones personalizadas de viajes en barco!</p>
+        <p className="text-lg text-slate-700 font-medium">¡Completa el formulario para obtener recomendaciones personalizadas de viajes en barco!</p>
       </div>
     );
   }
@@ -417,7 +467,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const remarkPlugins = [remarkGfm];
 
   return (
-    <div id="recommendation-content" className="recommendation-card bg-gradient-to-br from-white via-blue-50/30 to-cyan-50/30 p-10 md:p-12 rounded-3xl shadow-2xl w-full break-words border border-blue-100/50 backdrop-blur-sm">
+    <div id="recommendation-content" className="recommendation-card bg-gradient-to-br from-white via-blue-50/30 to-cyan-50/30 p-10 md:p-12 rounded-3xl shadow-2xl w-full break-words border border-blue-100/50 backdrop-blur-sm mt-10">
       {mainTitle && (
         <div className="mb-10 pb-6 border-b border-slate-200/50">
           <h2 className="recommendation-header text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent text-center drop-shadow-lg">

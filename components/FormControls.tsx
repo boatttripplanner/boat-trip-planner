@@ -10,7 +10,7 @@ export const InputField: React.FC<InputFieldProps> = ({ label, id, ...props }) =
     {label && <label className="block text-slate-700 font-medium mb-1">{label}</label>}
     <input
       id={id}
-      className="w-full px-4 py-2 rounded-lg border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all duration-150 bg-white placeholder:text-slate-400"
+      className="w-full px-4 py-2 rounded-lg border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all duration-150 bg-white text-black placeholder-black disabled:text-black"
       aria-required={props.required}
       {...props}
     />
@@ -29,7 +29,7 @@ export const TextAreaField: React.FC<TextAreaFieldProps> = ({ label, id, ...prop
     </label>
     <textarea
       id={id}
-      className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-base text-slate-900 placeholder:text-slate-500 disabled:bg-slate-50 disabled:text-slate-500"
+      className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-base text-black placeholder-black disabled:bg-slate-50 disabled:text-black"
       aria-required={props.required}
       {...props}
     />
@@ -52,12 +52,12 @@ export const SelectField: React.FC<SelectFieldProps> = ({ label, id, options, va
       id={id}
       value={value}
       onChange={onChange}
-      className="w-full px-4 py-2 rounded-lg border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all duration-150 bg-white text-slate-700"
+      className="w-full px-4 py-2 rounded-lg border border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all duration-150 bg-white text-black disabled:text-black"
       aria-required={rest.required}
       {...rest}
     >
       {options.map(option => (
-        <option key={option.value} value={option.value}>
+        <option key={option.value} value={option.value} className="text-black">
           {option.label}
         </option>
       ))}
@@ -102,20 +102,30 @@ interface DateFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
 }
 
-export const DateField: React.FC<DateFieldProps> = ({ label, id, ...props }) => (
-  <div>
-    <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">
-      {label} {props.required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      id={id}
-      type="date"
-      className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-base text-slate-900 placeholder:text-slate-500 disabled:bg-slate-50 disabled:text-slate-500"
-      aria-required={props.required}
-      {...props}
-    />
-  </div>
-);
+export const DateField: React.FC<DateFieldProps> = ({ label, id, ...props }) => {
+  // Obtener la fecha de hoy en formato YYYY-MM-DD
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">
+        {label} {props.required && <span className="text-red-500">*</span>}
+      </label>
+      <input
+        id={id}
+        type="date"
+        min={props.min || todayStr}
+        className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-base text-black placeholder-black disabled:bg-slate-50 disabled:text-black"
+        aria-required={props.required}
+        {...props}
+      />
+    </div>
+  );
+};
 
 interface RadioGroupProps {
   label: string;

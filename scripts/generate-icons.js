@@ -1,68 +1,53 @@
-import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const sizes = [
-  72, 96, 114, 120, 128, 144, 152, 180, 192, 384, 512
+// Iconos que necesitamos generar
+const iconSizes = [
+  72, 96, 114, 120, 144, 150, 152, 180, 192, 310, 512
 ];
 
-const specialSizes = [
-  { width: 310, height: 150, name: 'icon-310x150.png' },
-  { width: 310, height: 310, name: 'icon-310x310.png' },
-  { width: 150, height: 150, name: 'icon-150x150.png' },
-  { width: 70, height: 70, name: 'icon-70x70.png' }
-];
-
-async function generateIcons() {
-  const iconDir = path.join(__dirname, '../public/icons');
-  
-  // Asegurar que el directorio existe
-  if (!fs.existsSync(iconDir)) {
-    fs.mkdirSync(iconDir, { recursive: true });
-  }
-
-  const svgPath = path.join(iconDir, 'icon-base.svg');
-  
-  if (!fs.existsSync(svgPath)) {
-    console.error('No se encontró el archivo icon-base.svg');
-    return;
-  }
-
-  console.log('Generando iconos...');
-
-  // Generar iconos cuadrados
-  for (const size of sizes) {
-    try {
-      await sharp(svgPath)
-        .resize(size, size)
-        .png()
-        .toFile(path.join(iconDir, `icon-${size}x${size}.png`));
-      
-      console.log(`✓ Generado icon-${size}x${size}.png`);
-    } catch (error) {
-      console.error(`✗ Error generando icon-${size}x${size}.png:`, error.message);
-    }
-  }
-
-  // Generar iconos especiales
-  for (const { width, height, name } of specialSizes) {
-    try {
-      await sharp(svgPath)
-        .resize(width, height)
-        .png()
-        .toFile(path.join(iconDir, name));
-      
-      console.log(`✓ Generado ${name}`);
-    } catch (error) {
-      console.error(`✗ Error generando ${name}:`, error.message);
-    }
-  }
-
-  console.log('¡Iconos generados exitosamente!');
+// Crear directorio de iconos si no existe
+const iconsDir = path.join(process.cwd(), 'public', 'icons');
+if (!fs.existsSync(iconsDir)) {
+  fs.mkdirSync(iconsDir, { recursive: true });
 }
 
-generateIcons().catch(console.error); 
+// Crear iconos placeholder simples
+iconSizes.forEach(size => {
+  const svgContent = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${size}" height="${size}" fill="#0d9488"/>
+  <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial, sans-serif" font-size="${size/4}">🚢</text>
+</svg>`;
+  
+  const filePath = path.join(iconsDir, `icon-${size}x${size}.png`);
+  const svgPath = path.join(iconsDir, `icon-${size}x${size}.svg`);
+  
+  // Guardar como SVG por ahora (los PNG se pueden generar después con una herramienta como sharp)
+  fs.writeFileSync(svgPath, svgContent);
+  console.log(`✅ Icono creado: icon-${size}x${size}.svg`);
+});
+
+// Crear iconos específicos para diferentes plataformas
+const specificIcons = [
+  { name: 'icon-310x150.png', width: 310, height: 150 },
+  { name: 'icon-310x310.png', width: 310, height: 310 },
+  { name: 'icon-150x150.png', width: 150, height: 150 },
+  { name: 'icon-70x70.png', width: 70, height: 70 }
+];
+
+specificIcons.forEach(icon => {
+  const svgContent = `<svg width="${icon.width}" height="${icon.height}" viewBox="0 0 ${icon.width} ${icon.height}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${icon.width}" height="${icon.height}" fill="#0d9488"/>
+  <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial, sans-serif" font-size="${Math.min(icon.width, icon.height)/4}">🚢</text>
+</svg>`;
+  
+  const svgPath = path.join(iconsDir, icon.name.replace('.png', '.svg'));
+  fs.writeFileSync(svgPath, svgContent);
+  console.log(`✅ Icono creado: ${icon.name.replace('.png', '.svg')}`);
+});
+
+console.log('\n🎉 Iconos SVG creados exitosamente!');
+console.log('💡 Para convertir a PNG, puedes usar herramientas como:');
+console.log('   - https://convertio.co/svg-png/');
+console.log('   - https://cloudconvert.com/svg-to-png');
+console.log('   - O instalar sharp: npm install sharp'); 

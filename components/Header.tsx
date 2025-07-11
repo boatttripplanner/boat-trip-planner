@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ title, onNavigateHome, onNavigateToBlog
           className="group focus:outline-none focus:ring-2 focus:ring-teal-300 focus:ring-offset-2 focus:ring-offset-teal-600 rounded-lg px-3 py-2 sm:px-4 border-2 border-teal-700 hover:border-white hover:bg-teal-700/60 transition-colors duration-150 flex-shrink min-w-0"
           aria-label={`Ir a la página principal de ${title.split('|')[0].trim()}`}
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white group-hover:text-slate-100 transition-colors duration-150 break-words">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-lg group-hover:text-slate-100 transition-colors duration-150 break-words">
             {title}
           </h1>
         </button>
